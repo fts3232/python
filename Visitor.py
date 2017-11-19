@@ -2,6 +2,8 @@ import random;
 import urllib;
 import subprocess;
 import re;
+import urllib.request;
+import socket;
 class Visitor:
     '访问类'
     def __init(self):
@@ -28,7 +30,15 @@ class Visitor:
         if('referer' in options):
             headers['referer'] = options['referer'];
         return headers;
-    def visit(self,url,options):
+    def visit(self,url,options={}):
+        try:
+            socket.setdefaulttimeout(10)
+            request = urllib.request.Request(url,{},self.getHeaders(options));
+            response = urllib.request.urlopen(request);
+            print(response.read().decode('utf-8'));
+            response.close();
+        except Exception as e:
+            print(e);
         pass; 
     def ping(self,url):
         try:
@@ -42,6 +52,4 @@ class Visitor:
             alive = False;
             time = 'unkown';
         return {'time':time,'alive':alive};
-
-a = Visitor()
-print(a.ping('localhost'));
+a = Visitor().visit('https://announce.javbus2.pw/website.php');
