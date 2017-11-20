@@ -3,10 +3,12 @@ import urllib
 import subprocess
 import urllib.request
 import socket
+import time
 
 
 class Visitor:
     '访问类'
+    __visits = 1
 
     def __init__(self):
         pass
@@ -43,10 +45,17 @@ class Visitor:
             response = urllib.request.urlopen(request)
             ret = response.read().decode('utf-8', 'ignore')
             response.close()
-            print('访问' + url + '成功')
+            if(ret is None):
+                raise Exception("None")
+            print('访问' + url + '成功,访问次数：' + str(self.__visits))
+            self.__visits = 1
             return ret
         except Exception as e:
-            print(e)
+            print('访问' + url + '失败,错误：' + str(e) + ',访问次数：' + str(self.__visits))
+            time.sleep(2)
+            self.__visits += 1
+            if(self.__visits <= 10):
+                self.visit(url, options)
 
     def ping(self, url):
         try:
@@ -56,9 +65,9 @@ class Visitor:
                                    stdout=subprocess.PIPE)
             ret = str(ret.stdout.read())
             alive = True
-            time = ret[ret.rindex('=') + 2:ret.rindex('ms')]
+            ms = ret[ret.rindex('=') + 2:ret.rindex('ms')]
         except Exception as e:
             alive = False
-            time = 'unkown'
-        print('ping ' + host + '完成，平均时间为' + time)
-        return {'url': url, 'time': int(time), 'alive': alive}
+            ms = 'unkown'
+        print('ping ' + host + '完成，平均时间为' + ms)
+        return {'url': url, 'time': int(ms), 'alive': alive}

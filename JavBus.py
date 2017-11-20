@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from Visitor import Visitor
+import threading
 
 
 class JavBus(Visitor):
@@ -22,16 +23,23 @@ class JavBus(Visitor):
     def get_fast_url(self, urls):
         time = 0
         fast = None
+        threads = []
         for url in urls:
-            ret = self.__visitor.ping(url)
-            if(ret['alive'] is True and (ret['time'] <= time or fast is None)):
-                fast = ret
-                time = ret['time']
-        return fast
+            # ret = self.__visitor.ping(url)
+            task = threading.Thread(target=self.__visitor.ping, args=(url,))
+            threads.append(task)
+            task.start()
+        for thread in threads:
+            thread.join()
+        print('success')
+        print(threads[0])
+        #     if(ret['alive'] is True and (ret['time'] <= time or fast is None)):
+        #         fast = ret
+        #         time = ret['time']
+        # return fast
 
     def get_movie_list(self, body):
         soup = BeautifulSoup(body, "html.parser")
-        print(soup)
         tags = soup.find_all('a', class_="movie-box")
         movie_list = []
         for tag in tags:
@@ -42,8 +50,8 @@ class JavBus(Visitor):
         ret = self.__visitor.visit(self.publish_page)
         urls = self.get_urls(ret)
         fast = self.get_fast_url(urls)
-        ret = self.__visitor.visit(fast['url'])
-        self.get_movie_list(ret)
+        # ret = self.__visitor.visit(fast['url'])
+        # print(self.get_movie_list(ret))
 
 
 JavBus().run()
