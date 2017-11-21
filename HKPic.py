@@ -6,14 +6,14 @@ import os
 import re
 
 
-class JavBus(Visitor):
-    'JavBus'
+class HKPic(Visitor):
+    'HKPic'
     __publish_page = 'https://announce.javbus2.pw/website.php'
-    __get_magnet_path = '/ajax/uncledatoolsbyajax.php'
     __url = None
 
     def __init__(self):
         Visitor.__init__(self)
+        pass
 
     def get_urls(self, body):
         soup = BeautifulSoup(body, "html.parser")
@@ -85,7 +85,7 @@ class JavBus(Visitor):
             threads = []
             for i, sample in enumerate(sample_box):
                 url = sample.find('img')['src']
-                task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
+                task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i) ))
                 threads.append(task)
                 task.start()
                 task.join()
@@ -122,4 +122,6 @@ class JavBus(Visitor):
             time.sleep(1)
 
 
-JavBus().run()
+# https://www.javbus.info/EIKI-059
+# https://pics.javcdn.pw/cover/6ar5_b.jpg
+JavBus().visit_single('https://www.javbus.info/GVG-359')
