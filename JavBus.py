@@ -6,14 +6,15 @@ import os
 import re
 
 
-class JavBus(Visitor):
+class JavBus():
     'JavBus'
     __publish_page = 'https://announce.javbus2.pw/website.php'
     __get_magnet_path = '/ajax/uncledatoolsbyajax.php'
     __url = None
+    __visitor = None
 
-    def __init__(self):
-        Visitor.__init__(self)
+    def __init__(self, visitor):
+        self.__visitor = visitor
 
     def get_urls(self, body):
         soup = BeautifulSoup(body, "html.parser")
@@ -108,10 +109,10 @@ class JavBus(Visitor):
             fo.close()
 
     def run(self):
-        ret = self.visit(self.__publish_page)
+        ret = self.send_request(self.__publish_page).visit()
         urls = self.get_urls(ret)
         self.get_fast_url(urls)
-        ret = self.visit(self.__url['url'])
+        ret = self.send_request(self.__url['url']).visit()
         movie_list = self.get_movie_list(ret)
         threads = []
         for movie in movie_list:
@@ -122,4 +123,4 @@ class JavBus(Visitor):
             time.sleep(1)
 
 
-JavBus().run()
+JavBus(Visitor()).run()

@@ -8,8 +8,10 @@ import time
 
 class Visitor:
     '访问类'
-    __visits = 1
-    __max_visits = 2
+    __total_request_num = 1
+    __max_request_num = 2
+    __result = None
+    __url = None
 
     def __init__(self):
         pass
@@ -42,26 +44,41 @@ class Visitor:
             headers['referer'] = options['referer']
         return headers
 
-    def visit(self, url, options={}, data=None, decode=True):
+    def send_request(self, url, data=None, options={}):
         try:
+            self.__url = url
             socket.setdefaulttimeout(10)
             request = urllib.request.Request(url, data=data, headers=self.get_headers(options))
             response = urllib.request.urlopen(request)
-            ret = response.read()
-            if(decode is True):
-                ret = ret.decode('utf-8', 'ignore')
+            self.__result = response.read()
             response.close()
-            if(ret is None):
-                raise Exception("None")
-            print("访问 {url} 成功，访问次数：{num}".format(url=url, num=self.__visits))
-            self.__visits = 1
-            return ret
+            print("发送请求 {url} 成功，发送次数：{num}".format(url=url, num=self.__visits))
+            self.__total_request_num = 1
         except Exception as e:
-            print("访问 {url} 失败，错误：{error}，访问次数：{num}".format(url=url, num=self.__visits, error=e.message))
+            print("发送 {url} 失败，错误：{error}，发送次数：{num}".format(url=url, num=self.__visits, error=e.message))
             time.sleep(2)
-            self.__visits += 1
-            if(self.__visits <= self.__max_visits):
-                self.visit(url, options)
+            self.__total_request_num += 1
+            if(self.__total_request_num <= self.__max_request_num):
+                self.send_request(url, options=options, data=data)
+        return self
+
+    def download(self, path, filename):
+        if(self.__result is None):
+            print('{url} 下载失败'.format(url=self.__url))
+        else:
+            fo = open("{path}/{filename}".format(path=path, filename=filename), "wb+")
+            fo.write(self.__result)
+            fo.close()
+            print('{url} 下载成功'.format(url=self.__url))
+
+    def visit(self):
+        ret = None
+        if(self.__result is None):
+            print('{url} 访问失败'.format(url=self.__url))
+        else:
+            ret = self.__result.decode('utf-8', 'ignore')
+            print('{url} 访问成功'.format(url=self.__url))
+        return ret
 
     def ping(self, url):
         try:
