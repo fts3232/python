@@ -9,9 +9,10 @@ import re
 class DM5(Visitor):
     'DM5'
     __url = 'http://cnc.dm5.com/manhua-new'
+    __visitor = None
 
-    def __init__(self):
-        Visitor.__init__(self)
+    def __init__(self, visitor):
+        self.__visitor = visitor
 
     def get_dir(self, name):
         today = time.strftime("%Y-%m-%d", time.localtime())
@@ -24,18 +25,28 @@ class DM5(Visitor):
         return child_dir
 
     def run(self):
-        ret = self.visit(self.__publish_page)
-        urls = self.get_urls(ret)
-        self.get_fast_url(urls)
-        ret = self.visit(self.__url['url'])
-        movie_list = self.get_movie_list(ret)
-        threads = []
-        for movie in movie_list:
-            task = threading.Thread(target=self.visit_single, args=(movie,))
-            threads.append(task)
-            task.start()
-            task.join()
-            time.sleep(1)
+        ret = self.__visitor.send_request('http://cnc.dm5.com/m557761/').visit()
+        soup = BeautifulSoup(ret, "html.parser")
+        page_count = re.search('var DM5_IMAGE_COUNT=(\d+?);', ret).group(1)
+        cid = re.search('var DM5_CID=(\d+?);', ret).group(1)
+        page = 1
+        mkey = soup.find('input', {"id": 'dm5_key'})['value']
+        url = 'http://cnc.dm5.com/m557761/chapterfun.ashx?cid={cid}&page={page}&key={key}&language={language}&gtk={gtk}'.format(cid=cid, page=page, key=mkey, language=1, gtk=6)
+        ret = self.__visitor.send_request(url, options={'referer':'http://cnc.dm5.com/m557761/'}).visit()
+        print(ret)
+        # ret = self.__visitor.send_request(self.__url).visit()
+        # soup = BeautifulSoup(ret, "html.parser")
+        # tags = soup.find_all('li', {"class": 'red_lj'})
+        # for tag in tags:
+        #     title = tag.find('a').find('strong').text
+        #     episodes = tag.find_all('a')[2].text
+        #     url = tag.find_all('a')[2]['href']
+        #     covers = tag.find('img')['src']
+        #     date = re.search('\d+年\d+月\d+日', tag.text).group(0)
+        #     print(date)
+        #     print(covers)
+        #     print(title,num)
+        #     print(url)
 
 
-DM5().run()
+DM5(Visitor()).run()

@@ -8,14 +8,19 @@ import re
 
 class JavBus():
     'JavBus'
+    # 发布页url
     __publish_page = 'https://announce.javbus2.pw/website.php'
+    # 获取magnet的请求路径
     __get_magnet_path = '/ajax/uncledatoolsbyajax.php'
+    # 访问的url
     __url = None
+    # vistor类
     __visitor = None
 
     def __init__(self, visitor):
         self.__visitor = visitor
 
+    # 获取发布页上的所有url
     def get_urls(self, body):
         soup = BeautifulSoup(body, "html.parser")
         tags = soup.find_all('a')
@@ -24,6 +29,7 @@ class JavBus():
             urls.append(tag['href'])
         return urls
 
+    # 通过ping来获取速度最快的url
     def get_fast_url(self, urls):
         threads = []
         for url in urls:
@@ -34,11 +40,13 @@ class JavBus():
             thread.join()
         print(self.__url)
 
+    # 重写ping
     def ping(self, url):
-        ret = Visitor.ping(self, url)
+        ret = self.__visitor.ping(self, url)
         if(ret['alive'] is True and (self.__url is None or ret['time'] <= self.__url['time'])):
             self.__url = ret
 
+    # 获取列表
     def get_movie_list(self, body):
         soup = BeautifulSoup(body, "html.parser")
         tags = soup.find_all('a', class_="movie-box")
@@ -48,12 +56,12 @@ class JavBus():
         print(movie_list)
         return movie_list
 
+    # download sample图片
     def download_sample(self, url, path, filename):
-        ret = self.visit(url, decode=False)
-        fo = open("{path}/{filename}".format(path=path, filename=filename), "wb+")
-        fo.write(ret)
-        fo.close
+        ret = self.__visitor.send_request(url).download(path, filename)
+        return ret
 
+    # 获取目录
     def get_dir(self, name):
         today = time.strftime("%Y-%m-%d", time.localtime())
         parent_dir = "./JavBus/{today}".format(today=today)
@@ -64,6 +72,7 @@ class JavBus():
             os.mkdir(child_dir)
         return child_dir
 
+    # 访问详情页
     def visit_single(self, url):
         body = self.visit(url)
         soup = BeautifulSoup(body, "html.parser")
@@ -76,7 +85,7 @@ class JavBus():
         identifier = identifier.text
         print(identifier)
         dir_path = self.get_dir(identifier)
-        ret = self.visit(big_image, options={"referer": url}, decode=False)
+        ret = self.__visitor.send_request(big_image, options={"referer": url}).visit()
         fo = open("{path}/{filename}.jpg".format(path=dir_path, filename=identifier), "wb+")
         fo.write(ret)
         fo.close()
@@ -92,12 +101,13 @@ class JavBus():
                 task.join()
                 time.sleep(1)
 
+    # 获取magnet链接
     def get_magnet_link(self, body, referer, dir_path):
         url = 'https://www.javbus.info' + self.__get_magnet_path
         gid = re.search('var gid = (.*?);', body).group(1)
         img = re.search("var img = '(.*?)';", body).group(1)
         url = url + "?gid={gid}&img={img}&uc=0&lang=zh".format(gid=gid, img=img)
-        ret = self.visit(url, {"referer": referer})
+        ret = self.__visitor.send_request(url, {"referer": referer}).visit()
         soup = BeautifulSoup(ret, "html.parser")
         tags = soup.find_all('tr')
         if(len(tags) > 0):
@@ -109,10 +119,10 @@ class JavBus():
             fo.close()
 
     def run(self):
-        ret = self.send_request(self.__publish_page).visit()
+        ret = self.__visitor.send_request(self.__publish_page).visit()
         urls = self.get_urls(ret)
         self.get_fast_url(urls)
-        ret = self.send_request(self.__url['url']).visit()
+        ret = self.__visitor.send_request(self.__url['url']).visit()
         movie_list = self.get_movie_list(ret)
         threads = []
         for movie in movie_list:
