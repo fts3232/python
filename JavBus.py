@@ -12,39 +12,39 @@ class JavBus():
     __publish_page = 'https://announce.javbus2.pw/website.php'
     # 获取magnet的请求路径
     __get_magnet_path = '/ajax/uncledatoolsbyajax.php'
-    # 访问的url
-    __url = None
+    # 访问的host
+    __host = None
     # vistor类
     __visitor = None
 
     def __init__(self, visitor):
         self.__visitor = visitor
 
-    # 获取发布页上的所有url
-    def get_urls(self, body):
+    # 获取发布页上的所有host
+    def get_hosts(self, body):
         soup = BeautifulSoup(body, "html.parser")
         tags = soup.find_all('a')
-        urls = []
+        hosts = []
         for tag in tags:
-            urls.append(tag['href'])
-        return urls
+            hosts.append(tag['href'])
+        return hosts
 
-    # 通过ping来获取速度最快的url
-    def get_fast_url(self, urls):
+    # 通过ping来获取速度最快的host
+    def get_fast_host(self, hosts):
         threads = []
-        for url in urls:
-            task = threading.Thread(target=self.ping, args=(url,))
+        for host in hosts:
+            task = threading.Thread(target=self.ping, args=(host,))
             threads.append(task)
             task.start()
         for thread in threads:
             thread.join()
-        print(self.__url)
+        print(self.__host)
 
     # 重写ping
-    def ping(self, url):
-        ret = self.__visitor.ping(self, url)
-        if(ret['alive'] is True and (self.__url is None or ret['time'] <= self.__url['time'])):
-            self.__url = ret
+    def ping(self, host):
+        ret = self.__visitor.ping(self, host)
+        if(ret['alive'] is True and (self.__host is None or ret['time'] <= self.__host['time'])):
+            self.__host = ret
 
     # 获取列表
     def get_movie_list(self, body):
@@ -120,9 +120,9 @@ class JavBus():
 
     def run(self):
         ret = self.__visitor.send_request(self.__publish_page).visit()
-        urls = self.get_urls(ret)
-        self.get_fast_url(urls)
-        ret = self.__visitor.send_request(self.__url['url']).visit()
+        hosts = self.get_hosts(ret)
+        self.get_fast_host(hosts)
+        ret = self.__visitor.send_request(self.__host['url']).visit()
         movie_list = self.get_movie_list(ret)
         threads = []
         for movie in movie_list:

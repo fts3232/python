@@ -1,9 +1,10 @@
 import random
 import urllib
 import subprocess
-import urllib.request
 import socket
 import time
+import http.cookiejar
+import threading
 
 
 class Visitor:
@@ -16,9 +17,13 @@ class Visitor:
     __result = None
     # 访问的url
     __url = None
+    # opener
+    __urlOpener = None
 
     def __init__(self):
-        pass
+        # 使用cookie
+        cookiejar = http.cookiejar.CookieJar()
+        self.__urlOpener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookiejar))
 
     # 生成ip
     def create_ip(self):
@@ -45,10 +50,7 @@ class Visitor:
             'Pragma': 'no-cache',
             'Upgrade-Insecure-Requests': '1'
         }
-        if('host' in options):
-            headers['host'] = options['host']
-        if('referer' in options):
-            headers['referer'] = options['referer']
+        headers.update(options)
         return headers
 
     # 发送请求
@@ -56,8 +58,10 @@ class Visitor:
         try:
             self.__url = url
             socket.setdefaulttimeout(10)
+            if(data is not None):
+                data = bytes(urllib.parse.urlencode(data), encoding='utf8')
             request = urllib.request.Request(url, data=data, headers=self.get_headers(options))
-            response = urllib.request.urlopen(request)
+            response = self.__urlOpener.open(request)
             self.__result = response.read()
             response.close()
             print("发送请求 {url} 成功，发送次数：{num}".format(url=url, num=self.__total_request_num))
@@ -97,9 +101,7 @@ class Visitor:
     def ping(self, url):
         try:
             host = self.get_host(url)
-            ret = subprocess.Popen(["ping.exe", host],
-                                   shell=True,
-                                   stdout=subprocess.PIPE)
+            ret = subprocess.Popen(["ping.exe", host], shell=True, stdout=subprocess.PIPE)
             ret = str(ret.stdout.read())
             alive = True
             ms = ret[ret.rindex('=') + 2:ret.rindex('ms')]
@@ -107,4 +109,19 @@ class Visitor:
             alive = False
             ms = 'unkown'
         print("ping {host} 完成，平均时间为{time}".format(host=host, time=ms))
-        return {'url': url, 'time': int(ms), 'alive': alive}
+        ret = {'host': host, 'url': url, 'time': ms, 'alive': alive}
+        if(ret['alive'] is True and (self.__result is None or ret['time'] <= self.__result['time'])):
+            self.__result = ret
+        return self.__result
+
+    def ping_list(self, urls):
+        threads = []
+        self.__result = None
+        for url in urls:
+            task = threading.Thread(target=self.ping, args=(url,))
+            threads.append(task)
+            task.start()
+        for thread in threads:
+            thread.join()
+        print(self.__result)
+        return self.__result['url']
