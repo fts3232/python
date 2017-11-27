@@ -18,7 +18,7 @@ class HKPic(Visitor):
     # 登录密码
     __password = '323232'
     # 板块地址
-    __forum_path = '/forum.php?mod=forumdisplay&action=list&fid=215#groupnav'
+    __forum_path = '/forum.php?mod=forumdisplay&action=list&fid=215&filter=typeid&typeid=1042'
     __host = None
 
     def __init__(self, visitor):
@@ -51,10 +51,14 @@ class HKPic(Visitor):
         self.get_host()
         self.login()
         body = self.__visitor.send_request(self.__host + self.__forum_path).visit()
-        # soup = BeautifulSoup(body, "html.parser")
-        # tags = soup.find_all('a')
-        # for tag in tags:
-        #     print(tag.text)
+        soup = BeautifulSoup(body, "html.parser")
+        tags = soup.find_all('a', {'class': 'xst'})
+        today = time.strftime("%m.%d", time.localtime())
+        link_list = []
+        for tag in tags:
+            if(re.search(today,tag.text)):
+                link_list.append(tag)
+                print(tag.text)
 
 
 HKPic(Visitor()).run()
