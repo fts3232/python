@@ -20,7 +20,7 @@ class JavBus():
     def __init__(self, visitor):
         self.__visitor = visitor
 
-    # 获取发布页上的所有host
+    # 获取域名
     def get_host(self):
         body = self.__visitor.send_request(self.__publish_page).visit()
         soup = BeautifulSoup(body, "html.parser")
