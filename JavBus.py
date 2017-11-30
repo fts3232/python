@@ -12,7 +12,7 @@ class JavBus():
     __publish_page = 'https://announce.javbus2.pw/website.php'
     # 获取magnet的请求路径
     __get_magnet_path = '/ajax/uncledatoolsbyajax.php'
-    # 访问的host
+    # 访问的域名
     __host = None
     # vistor类
     __visitor = None
@@ -21,30 +21,16 @@ class JavBus():
         self.__visitor = visitor
 
     # 获取发布页上的所有host
-    def get_hosts(self, body):
+    def get_host(self):
+        body = self.__visitor.send_request(self.__publish_page).visit()
         soup = BeautifulSoup(body, "html.parser")
         tags = soup.find_all('a')
-        hosts = []
+        urls_list = []
         for tag in tags:
-            hosts.append(tag['href'])
-        return hosts
-
-    # 通过ping来获取速度最快的host
-    def get_fast_host(self, hosts):
-        threads = []
-        for host in hosts:
-            task = threading.Thread(target=self.ping, args=(host,))
-            threads.append(task)
-            task.start()
-        for thread in threads:
-            thread.join()
-        print(self.__host)
-
-    # 重写ping
-    def ping(self, host):
-        ret = self.__visitor.ping(self, host)
-        if(ret['alive'] is True and (self.__host is None or ret['time'] <= self.__host['time'])):
-            self.__host = ret
+            urls_list.append(tag['href'])
+        print(urls_list)
+        self.__host = self.__visitor.ping_list(urls_list)
+        return self.__host
 
     # 获取列表
     def get_movie_list(self, body):
@@ -119,10 +105,8 @@ class JavBus():
             fo.close()
 
     def run(self):
-        ret = self.__visitor.send_request(self.__publish_page).visit()
-        hosts = self.get_hosts(ret)
-        self.get_fast_host(hosts)
-        ret = self.__visitor.send_request(self.__host['url']).visit()
+        self.get_host()
+        ret = self.__visitor.send_request(self.__host).visit()
         movie_list = self.get_movie_list(ret)
         threads = []
         for movie in movie_list:

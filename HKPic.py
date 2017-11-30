@@ -19,6 +19,7 @@ class HKPic(Visitor):
     __password = '323232'
     # 板块地址
     __forum_path = '/forum.php?mod=forumdisplay&action=list&fid=215&filter=typeid&typeid=1042'
+    # 访问的域名
     __host = None
 
     def __init__(self, visitor):
@@ -54,11 +55,27 @@ class HKPic(Visitor):
         soup = BeautifulSoup(body, "html.parser")
         tags = soup.find_all('a', {'class': 'xst'})
         today = time.strftime("%m.%d", time.localtime())
-        link_list = []
         for tag in tags:
-            if(re.search(today,tag.text)):
-                link_list.append(tag)
+            if(re.search(today, tag.text)):
                 print(tag.text)
+                body = self.__visitor.send_request("{host}/{path}".format(host=self.__host, path=tag['href'])).visit()
+                fo = open("test.html", "w+",encoding='utf-8')
+                fo.write(body)
+                fo.close()
+                # pattern = re.compile(r'^(?!使用大陸)+([^<>\n\r]+?)<br />(?:\n\n([^<>\n\r]+?)<br />)?(?:\n\n([^<>\n\r]+?)<br />)?[\s\S]*?<a href="(.*?)"', re.M)
+                # matches = pattern.findall(body)
+                # print(matches)
+                # soup = BeautifulSoup(body, "html.parser")
+                # tags = soup.find_all('img', {'class': 'zoom'})
+                # for tag in tags:
+                #     print(tag['file'])
+                break
 
 
-HKPic(Visitor()).run()
+# HKPic(Visitor()).run()
+fo = open("test.html", "r",encoding='utf-8')
+body = fo.read()
+fo.close()
+pattern = re.compile(r'^(?!使用大陸)+([^<>\n\r]+?)<br />(?:\n\n([^<>\n\r]+?)<br />)?(?:\n\n([^<>\n\r]+?)<br />)?[\s\S]*?<img.*file="(.*?)"[\s\S]*?<a href="(.*?)"', re.M)
+matches = pattern.findall(body)
+print(matches)
