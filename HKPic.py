@@ -72,15 +72,18 @@ class HKPic(Visitor):
             if(re.search(today, tag.text)):
                 print(tag.text)
                 body = self.__visitor.send_request("{host}/{path}".format(host=self.__host, path=tag['href'])).visit()
-                pattern = re.compile(r'^(?!使用大陸)+([^<>\n\r]+?)<br />(?:\n\n[^<>\n\r]+?<br />)?(?:\n\n[^<>\n\r]+?<br />)?[\s\S]*?<img.*file="(.*?)"[\s\S]*?<a href="(.*?)"', re.M)
+                pattern = re.compile(r'^(?!使用大陸)+([^<>\n\r]+?)<br />(?:\n\n[^<>\n\r]+?<br />)?(?:\n\n[^<>\n\r]+?<br />)?[\s\S]*?([\s\S]*?)<a href="(.*?)"', re.M)
                 matches = pattern.findall(body)
                 for match in matches:
-                    title = re.sub(r'([\?\\\/\|:\<\>\t\r\n ]+)|(...$)', '', match[0])
-                    pic = match[1]
+                    title = re.sub(r'([\?\\\/\|:\<\>\t\r\n ]+)|(\.\.\.$)', '', match[0])
                     link = match[2]
                     dir_path = self.get_dir(title)
-                    self.__visitor.send_request("{host}/{path}".format(host=self.__host, path=pic)).download(dir_path, 'sample.jpg')
-                    time.sleep(1)
+                    soup = BeautifulSoup(match[1], "html.parser")
+                    tags = soup.find_all('img')
+                    if(tags is not None):
+                        for index, tag in enumerate(tags):
+                            self.__visitor.send_request("{host}/{path}".format(host=self.__host, path=tag['file'])).download(dir_path, 'sample-{index}.jpg'.format(index=index))
+                            time.sleep(1)
                     fo = open("{path}/pan.txt".format(path=dir_path), "w+")
                     fo.write(link)
                     fo.close()
