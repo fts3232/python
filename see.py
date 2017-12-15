@@ -1,6 +1,7 @@
 import pyautogui
-import win32gui
 import subprocess
+from PIL import Image
+from pylab import *
 # pyautogui.FAILSAFE = True 鼠标光标在屏幕左上角，中断PyAutoGUI函数
 # pyautogui.PAUSE 延迟时间
 # pyautogui.size() 获取屏幕分辨率
@@ -20,4 +21,12 @@ import subprocess
 # pyautogui.alert(text) 显示带有一段消息和一个确认按钮的警告框
 # pyautogui.confirm(text) 显示带有一段消息以及确认按钮和取消按钮的对话框
 # pyautogui.prompt(text) 显示可提示用户输入的对话框
-print(win32gui)
+# 
+# PIL.Image
+im = Image.open("asdasdno_wm.jpg")
+# im = Image.open("asdasdno_wm.jpg").convert('L') 灰度
+print(im.format,im.size,im.mode) # 属性
+# im.thumbnail((100,100)) 缩略图
+# im.resize((128,128)) 调整一幅图像的尺寸
+# im.rotate(45) 旋转一幅图像
+im.show() # 显示
