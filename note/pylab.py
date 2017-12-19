@@ -39,11 +39,29 @@ font = FontProperties(fname=r"c:\windows\fonts\SimSun.ttc", size=14)
 # ginput(n) 鼠标取坐标点，n为取坐标点的数量
 # show() 显示出绘图窗口
 # array() 转为NumPy数组对象
-# 
+# array.min() 最小像素
+# array.max() 最大像素
+# array.flatten() 返回一个折叠成一维的数组
 # 
 # 灰度变换函数
 # 图像反转，底片效果,反相 f(x)=255-x
 # 将图像像素值变换到 100...200 区间 f(x)=(100/255)x+100
 # 对图像像素值求平方后得到的图像(二次函数变换，使较暗的像素值变得更小) f(x)=255(x/255)^2
 # 
-print( (10/255) * 10 + 10 )
+# 增强对比度 直方图均衡化
+# 
+# def histeq(img,nbr_bins=256):
+#     # 获取直方图p(r)
+#     imhist, bins = histogram(img.flatten(), nbr_bins, normed = True)
+#     # 获取T(r)
+#     cdf = imhist.cumsum() # cumulative distribution function
+#     cdf = 255 * cdf /cdf[-1] 
+#     # 获取s，并用s替换原始图像对应的灰度值
+#     result = interp(img.flatten(),bins[:-1],cdf)
+#     return result.reshape(img.shape),cdf
+#     
+# 图像平均
+# im = array(Image.open('./data/Univ1.jpg'),'f')
+# im2 = array(Image.open('./data/Univ2.jpg'))
+# im3 = array(Image.open('./data/Univ3.jpg'))
+# new_im = array((im + im2 + im3) / 3, 'uint8')    
