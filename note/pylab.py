@@ -61,7 +61,13 @@ font = FontProperties(fname=r"c:\windows\fonts\SimSun.ttc", size=14)
 #     return result.reshape(img.shape),cdf
 #     
 # 图像平均
-# im = array(Image.open('./data/Univ1.jpg'),'f')
-# im2 = array(Image.open('./data/Univ2.jpg'))
-# im3 = array(Image.open('./data/Univ3.jpg'))
-# new_im = array((im + im2 + im3) / 3, 'uint8')    
+# def compute_average(filelist):
+# 	averageim = array(Image.open(filelist[0]),'f')
+# 	skipped = 0
+# 	for path in filelist[1:]:
+# 		try:
+# 			averageim += array(Image.open(path),'f')
+# 		except:
+# 			skipped += 1
+# 	averageim /= len(filelist) - skipped
+# 	return array(averageim,'uint8')
