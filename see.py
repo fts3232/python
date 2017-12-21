@@ -4,6 +4,7 @@ from pylab import *
 import os
 import pickle
 from scipy.ndimage import filters
+import sift
 # 添加中文字体支持
 from matplotlib.font_manager import FontProperties
 font = FontProperties(fname=r"c:\windows\fonts\SimSun.ttc", size=14)
@@ -73,29 +74,30 @@ def pca(X):
 # pickle.dump(V,f)
 # f.close()
 
-def gaussian_fileter(im,blur):
+def gaussian_filter(im, blur):
     im2 = zeros(im.shape)
+    if(len(im.shape) == 2):
+        im2 = filters.gaussian_filter(im, blur)
+    else:
+        for i in range(len(im.shape)):
+            im2[:, :, i] = filters.gaussian_filter(im[:, :, i], blur)
+    im2 = np.uint8(im2)
+    return im2
 
-a = array([[1,2,3],[4,4,5]])
-print(a[:,2])
-im = array(Image.open('./data/empire.jpg').convert('L'))
-blur = 2
+imname = './data/empire.jpg'
+im = array(Image.open(imname).convert('L'))
+sift.process_image(imname, 'empire.sift')
+l1, d1 = sift.read_features_from_file('empire.sift')
+
 figure()
 gray()
-axis('off')
-subplot(1, 2, 1)
-axis('off')
-title(u'原图', fontproperties=font)
-imshow(im)
-subplot(1, 2, 2)
-im2 = zeros(im.shape)
-if(len(im.shape)==2):
-	im2 = filters.gaussian_filter(im, 2)
-else:
-	for i in range(len(im.shape)):
-	    im2[:, :, i] = filters.gaussian_filter(im[:, :, i], blur)
-im2 = np.uint8(im2)
-imshow(im2)
+subplot(131)
+sift.plot_features(im, l1, circle=False)
+title(u'SIFT特征',fontproperties=font)
+subplot(132)
+sift.plot_features(im, l1, circle=True)
+title(u'用圆圈表示SIFT特征尺度',fontproperties=font)
+
 
 # for bi, blur in enumerate([2, 5, 10]):
 #   im2 = zeros(im.shape)
