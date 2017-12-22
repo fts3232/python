@@ -4,6 +4,8 @@ import threading
 import time
 import os
 import re
+import pickle
+import DB
 
 
 class JavBus():
@@ -22,14 +24,24 @@ class JavBus():
 
     # 获取域名
     def get_host(self):
-        body = self.__visitor.send_request(self.__publish_page).visit()
-        soup = BeautifulSoup(body, "html.parser")
-        tags = soup.find_all('a')
-        urls_list = []
-        for tag in tags:
-            urls_list.append(tag['href'])
-        print(urls_list)
-        self.__host = self.__visitor.ping_list(urls_list)
+        if(os.path.exists('./JavBus/host.pkl') is True):
+            fo = open('./JavBus/host.pkl', 'rb+')
+            ret = fo.read()
+            self.__host = pickle.loads(ret)
+            print(self.__host)
+            print('读取之前的记录')
+        else:
+            body = self.__visitor.send_request(self.__publish_page).visit()
+            soup = BeautifulSoup(body, "html.parser")
+            tags = soup.find_all('a')
+            urls_list = []
+            for tag in tags:
+                urls_list.append(tag['href'])
+            print(urls_list)
+            self.__host = self.__visitor.ping_list(urls_list)
+            fo = open('./JavBus/host.pkl', 'wb+')
+            fo.write(pickle.dumps(self.__host))
+            fo.close()
         return self.__host
 
     # 获取列表
@@ -60,7 +72,7 @@ class JavBus():
 
     # 访问详情页
     def visit_single(self, url):
-        body = self.visit(url)
+        body = self.__visitor.send_request(url).visit()
         soup = BeautifulSoup(body, "html.parser")
         big_image = soup.find('a', {"class": "bigImage"}).find('img')
         title = big_image['title']
@@ -70,11 +82,12 @@ class JavBus():
         identifier = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')[0].find_all('span')[1]
         identifier = identifier.text
         print(identifier)
+        db = DB.DB()
+        print(db.insert('insert into RECORD(IDENTIFIER,NAME,SAMPLE,MAGNET) values(?,?,?,?)'), (identifier,title,0,0))
+        db.commit()
+
         dir_path = self.get_dir(identifier)
-        ret = self.__visitor.send_request(big_image, options={"referer": url}).visit()
-        fo = open("{path}/{filename}.jpg".format(path=dir_path, filename=identifier), "wb+")
-        fo.write(ret)
-        fo.close()
+        self.__visitor.send_request(big_image, options={"referer": url}).download(dir_path, "{filename}.jpg".format(filename=identifier))
         self.get_magnet_link(body, url, dir_path)
         sample_box = soup.find_all('a', {"class": "sample-box"})
         if(len(sample_box) > 0):
@@ -105,6 +118,8 @@ class JavBus():
             fo.close()
 
     def run(self):
+        if(os.path.exists('./JavBus') is False):
+            os.mkdir('./JavBus')
         self.get_host()
         ret = self.__visitor.send_request(self.__host).visit()
         movie_list = self.get_movie_list(ret)
@@ -117,4 +132,6 @@ class JavBus():
             time.sleep(1)
 
 
-JavBus(Visitor()).run()
+# JavBus(Visitor()).run()
+db = DB.DB()
+db.insert('insert into RECORD(IDENTIFIER,NAME,SAMPLE,MAGNET) values(?,?,?,?)'), ('1','1','1','1')
