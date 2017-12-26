@@ -7,16 +7,44 @@ import http.cookiejar
 import threading
 
 
+class VisitResult:
+    '结果类'
+    # 访问的结果
+    __result = None
+    # 访问的url
+    __url = None
+
+    def __init__(self, url, result):
+        self.__result = result
+        self.__url = url
+
+    # 下载
+    def download(self, path, filename):
+        if(self.__result is None):
+            print('{url} 下载失败'.format(url=self.__url))
+        else:
+            fo = open("{path}/{filename}".format(path=path, filename=filename), "wb+")
+            fo.write(self.__result)
+            fo.close()
+            print('{url} 下载成功'.format(url=self.__url))
+
+    # 访问
+    def visit(self):
+        ret = None
+        if(self.__result is None):
+            print('{url} 访问失败'.format(url=self.__url))
+        else:
+            ret = self.__result.decode('utf-8', 'ignore')
+            print('{url} 访问成功'.format(url=self.__url))
+        return ret
+
+
 class Visitor:
     '访问类'
     # 当前请求次数
     __total_request_num = 1
     # 最大请求次数
     __max_request_num = 2
-    # 访问的结果
-    __result = None
-    # 访问的url
-    __url = None
     # opener
     __urlOpener = None
 
@@ -56,46 +84,24 @@ class Visitor:
     # 发送请求
     def send_request(self, url, data=None, options={}):
         try:
-            self.__url = url
+            result = None
             socket.setdefaulttimeout(10)
             if(data is not None):
                 data = bytes(urllib.parse.urlencode(data), encoding='utf8')
             request = urllib.request.Request(url, data=data, headers=self.get_headers(options))
             response = self.__urlOpener.open(request)
-            self.__result = response.read()
+            result = response.read()
             response.close()
             print("发送请求 {url} 成功，发送次数：{num}".format(url=url, num=self.__total_request_num))
             self.__total_request_num = 1
         except Exception as e:
-            print("发送 {url} 失败，错误：{error}，发送次数：{num}".format(url=url, num=self.__total_request_num, error=str(e)))
+            print("发送请求 {url} 失败，错误：{error}，发送次数：{num}".format(url=url, num=self.__total_request_num, error=str(e)))
             repr(e)
             time.sleep(2)
             self.__total_request_num += 1
             if(self.__total_request_num <= self.__max_request_num):
                 self.send_request(url, options=options, data=data)
-            else:
-                self.__result = None
-        return self
-
-    # 下载
-    def download(self, path, filename):
-        if(self.__result is None):
-            print('{url} 下载失败'.format(url=self.__url))
-        else:
-            fo = open("{path}/{filename}".format(path=path, filename=filename), "wb+")
-            fo.write(self.__result)
-            fo.close()
-            print('{url} 下载成功'.format(url=self.__url))
-
-    # 访问
-    def visit(self):
-        ret = None
-        if(self.__result is None):
-            print('{url} 访问失败'.format(url=self.__url))
-        else:
-            ret = self.__result.decode('utf-8', 'ignore')
-            print('{url} 访问成功'.format(url=self.__url))
-        return ret
+        return VisitResult(url, result)
 
     # ping
     def ping(self, url):
