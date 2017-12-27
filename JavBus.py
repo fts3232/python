@@ -126,49 +126,58 @@ class JavBus():
     # 访问详情页
     def visit_single(self, url):
         body = self.__visitor.send_request(url).visit()
-        soup = BeautifulSoup(body, "html.parser")
-        # 番号
-        identifier = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')[0].find_all('span')[1]
-        identifier = identifier.text
-        # 生成文件夹
-        dir_path = self.get_dir(identifier)
-        # 封面图
-        cover = soup.find('a', {"class": "bigImage"}).find('img')['src']
-        if(os.path.exists(os.path.join(dir_path, "cover.jpg")) is False):
-            self.__visitor.send_request(cover, options={"referer": url}).download(dir_path, "cover.jpg")
-        # 标题
-        title = soup.find('h3').text
-        title = title.replace(identifier + ' ', '')
-        # 是否存在sample图片
-        sample_box = soup.find_all('a', {"class": "sample-box"})
-        has_sample = 1 if len(sample_box) > 0 else 0
-        print("番号：{identifier} 片名：{title} 封面图片：{cover}".format(identifier=identifier, title=title, cover=cover))
-        # 插入数据
-        self.__db.begin()
-        row = self.__db.find('SELECT MOVIE_ID,SAMPLE FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
-        if(row is None):
-            # 分类标签
-            tags = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')[7].find_all('span', {"class": "genre"})
-            temp = []
-            for tag in tags:
-                temp.append(tag.find('a').text)
-            tag = ','.join(temp)
-            movie_id = self.__db.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,SAMPLE) VALUES(:IDENTIFIER,:TITLE,:TAG,:SAMPLE)', {'TITLE': title, 'IDENTIFIER': identifier, 'SAMPLE': has_sample, 'TAG': tag})
-        else:
-            movie_id = row['MOVIE_ID']
-            if(has_sample and row['SAMPLE'] == 0):
-                self.__db.update('UPDATE MOVIE SET SAMPLE = 1 WHERE MOVIE_ID = :ID', {'ID': row['MOVIE_ID']})
-        self.__db.commit()
-        # 获取magnet链接
-        self.get_magnet_link(movie_id, body, url, dir_path)
-        # 下载sample图片
-        if(row is None or (has_sample and row['SAMPLE'] == 0)):
-            threads = []
-            for i, sample in enumerate(sample_box):
-                url = sample.find('img')['src']
-                task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
-                threads.append(task)
-            self.startThreads(threads, num=2, sleep=2)
+        if(body is not None):
+            soup = BeautifulSoup(body, "html.parser")
+            # 番号
+            identifier = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')[0].find_all('span')[1]
+            identifier = identifier.text
+            # 生成文件夹
+            dir_path = self.get_dir(identifier)
+            # 封面图
+            cover = soup.find('a', {"class": "bigImage"}).find('img')['src']
+            if(os.path.exists(os.path.join(dir_path, "cover.jpg")) is False):
+                self.__visitor.send_request(cover, options={"referer": url}).download(dir_path, "cover.jpg")
+            # 标题
+            title = soup.find('h3').text
+            title = title.replace(identifier + ' ', '')
+            # 是否存在sample图片
+            sample_box = soup.find_all('a', {"class": "sample-box"})
+            has_sample = 1 if len(sample_box) > 0 else 0
+            print("番号：{identifier} 片名：{title} 封面图片：{cover}".format(identifier=identifier, title=title, cover=cover))
+            # 插入数据
+            self.__db.begin()
+            row = self.__db.find('SELECT MOVIE_ID,SAMPLE FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
+            if(row is None):
+                # 分类标签
+                tags = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')
+                category_tag_index = None
+                category = []
+                for index, tag in enumerate(tags):
+                    if(tag.has_attr('class') and 'header' in tag['class']):
+                        category_tag_index = index + 1
+                        continue
+                    if(index == category_tag_index):
+                        category_tags = tag.find_all('span', {"class": "genre"})
+                        for category_tag in category_tags:
+                            category.append(category_tag.find('a').text)
+                        break
+                category = ','.join(category)
+                movie_id = self.__db.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,SAMPLE) VALUES(:IDENTIFIER,:TITLE,:TAG,:SAMPLE)', {'TITLE': title, 'IDENTIFIER': identifier, 'SAMPLE': has_sample, 'TAG': category})
+            else:
+                movie_id = row['MOVIE_ID']
+                if(has_sample and row['SAMPLE'] == 0):
+                    self.__db.update('UPDATE MOVIE SET SAMPLE = 1 WHERE MOVIE_ID = :ID', {'ID': row['MOVIE_ID']})
+            self.__db.commit()
+            # 获取magnet链接
+            # self.get_magnet_link(movie_id, body, url, dir_path)
+            # 下载sample图片
+            # if(row is None or (has_sample and row['SAMPLE'] == 0)):
+            #     threads = []
+            #     for i, sample in enumerate(sample_box):
+            #         url = sample.find('img')['src']
+            #         task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
+            #         threads.append(task)
+            #     self.startThreads(threads, num=2, sleep=2)
 
     # 获取magnet链接
     def get_magnet_link(self, movie_id, body, referer, dir_path):
@@ -176,7 +185,7 @@ class JavBus():
         gid = re.search('var gid = (.*?);', body).group(1)
         img = re.search("var img = '(.*?)';", body).group(1)
         url = url + "?gid={gid}&img={img}&uc=0&lang=zh".format(gid=gid, img=img)
-        ret = self.__visitor.send_request(url, {"referer": referer}).visit()
+        ret = self.__visitor.send_request(url, options={"referer": referer}).visit()
         soup = BeautifulSoup(ret, "html.parser")
         tags = soup.find_all('tr')
         if(len(tags) > 0):
@@ -210,7 +219,7 @@ class JavBus():
         ret = self.__visitor.send_request(self.__host).visit()
         movie_list = self.get_movie_list(ret)
         threads = []
-        for index, movie in enumerate(movie_list[:1]):
+        for index, movie in enumerate(movie_list):
             task = threading.Thread(target=self.visit_single, args=(movie,))
             threads.append(task)
         self.startThreads(threads=threads, num=2, sleep=2)

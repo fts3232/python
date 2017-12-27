@@ -1,6 +1,9 @@
 import pymysql
 import re
-
+import PyMysqlPool
+from sqlalchemy import Column, String, create_engine
+help( create_engine)
+exit()
 
 class Mysql:
     'Mysql'
@@ -76,3 +79,48 @@ class Mysql:
 
     def begin(self):
         self.__conn.begin()
+
+
+# class ConnectionPool():
+#     __pool = None
+#     __conn = None
+#     cursor = None
+
+#     def __enter__(self):
+#         self.__conn = self.__getConn()
+#         print(self.__conn)
+#         # self.cursor = self.__conn.cursor()
+#         return self
+
+#     def __exit__(self):
+#         self.__conn.close()
+#         self.cursor.close()
+
+#     def __getConn(self):
+#         if self.__pool is None:
+#             self.__pool = PooledDB(creator=pymysql, mincached=10, maxcached=10,
+#                                    maxshared=20, maxconnections=100,
+#                                    blocking=True, maxusage=0,
+#                                    setsession=None,
+#                                    host='localhost', port='3306',
+#                                    user='root', passwd='',
+#                                    db='JavBus', use_unicode=False, charset='utf8')
+
+#         return self.__pool.connection()
+
+# pool = ConnectionPool()
+# with pool as db:
+#     print(1)
+#     # sql = 'select * from movie'
+#     # db.cursor.execute(sql)
+#     # print(db.cursor.fetchall())
+config = {
+    'pool_name': 'test',
+    'host': 'localhost',
+    'port': 3306,
+    'user': 'root',
+    'password': 'root',
+    'database': 'test'
+}
+db = ConnectionPool(**config)
+print(db)
