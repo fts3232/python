@@ -34,10 +34,11 @@ class JavBus():
             if(len(ret) == 0):
                 sql = "CREATE TABLE MOVIE(\
                        `MOVIE_ID` INT NOT NULL AUTO_INCREMENT,\
+                       `CATEGORY` TINYINT(1) NOT NULL DEFAULT 1,\
                        `IDENTIFIER` VARCHAR(30) NOT NULL,\
                        `TITLE`  VARCHAR(255) NOT NULL,\
-                       `SAMPLE` TINYINT(1) NOT NULL DEFAULT 0,\
-                       `MAGNET` TINYINT(1) NOT NULL DEFAULT 0,\
+                       `TAG` TEXT NOT NULL,\
+                       `SAMPLE` TINYINT(1) NOT NULL DEFAULT 1,\
                        `CREATED_TIME` DATETIME DEFAULT CURRENT_TIMESTAMP,\
                        PRIMARY KEY (`MOVIE_ID`)\
                        )\
@@ -53,6 +54,20 @@ class JavBus():
                        `DESCRIPTION`  TEXT NOT NULL,\
                        `CREATED_TIME` DATETIME DEFAULT CURRENT_TIMESTAMP,\
                        PRIMARY KEY (`LOG_ID`)\
+                       )\
+                       ENGINE=InnoDB\
+                       DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;"
+                ret = self.__db.query(sql)
+            sql = "SHOW TABLES LIKE 'DOWNLOAD_LINK'"
+            ret = self.__db.select(sql)
+            if(len(ret) == 0):
+                sql = "CREATE TABLE DOWNLOAD_LINK(\
+                       `LINK_ID` INT NOT NULL AUTO_INCREMENT,\
+                       `MOVIE_ID` VARCHAR(30) NOT NULL,\
+                       `LINK`  TEXT NOT NULL,\
+                       `PUBLISH_TIME` DATE NOT NULL,\
+                       `CREATED_TIME` DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                       PRIMARY KEY (`LINK_ID`)\
                        )\
                        ENGINE=InnoDB\
                        DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;"
@@ -118,41 +133,45 @@ class JavBus():
         # 生成文件夹
         dir_path = self.get_dir(identifier)
         # 封面图
-        big_image = soup.find('a', {"class": "bigImage"}).find('img')
-        # self.__visitor.send_request(big_image['src'], options={"referer": url}).download(dir_path, "{filename}.jpg".format(filename=identifier))
+        cover = soup.find('a', {"class": "bigImage"}).find('img')['src']
+        if(os.path.exists(os.path.join(dir_path, "cover.jpg")) is False):
+            self.__visitor.send_request(cover, options={"referer": url}).download(dir_path, "cover.jpg")
         # 标题
-        title = big_image['title']
+        title = soup.find('h3').text
+        title = title.replace(identifier + ' ', '')
         # 是否存在sample图片
         sample_box = soup.find_all('a', {"class": "sample-box"})
-        hasSample = 1 if len(sample_box) > 0 else 0
-        # magnet
-        hasMagnet = 1 if self.get_magnet_link(body, url, dir_path) is True else 0
-        print("番号：{identifier} 片名：{title} 封面图片：{big_image}".format(identifier=identifier, title=title, big_image=big_image['src']))
+        has_sample = 1 if len(sample_box) > 0 else 0
+        print("番号：{identifier} 片名：{title} 封面图片：{cover}".format(identifier=identifier, title=title, cover=cover))
         # 插入数据
         self.__db.begin()
-        row = self.__db.find('SELECT MOVIE_ID,SAMPLE,MAGNET FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
+        row = self.__db.find('SELECT MOVIE_ID,SAMPLE FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
         if(row is None):
-            self.__db.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,SAMPLE,MAGNET) VALUES(:IDENTIFIER,:TITLE,:SAMPLE,:MAGNET)', {'TITLE': title, 'IDENTIFIER': identifier, 'SAMPLE': hasSample, 'MAGNET': hasMagnet})
+            # 分类标签
+            tags = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')[7].find_all('span', {"class": "genre"})
+            temp = []
+            for tag in tags:
+                temp.append(tag.find('a').text)
+            tag = ','.join(temp)
+            movie_id = self.__db.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,SAMPLE) VALUES(:IDENTIFIER,:TITLE,:TAG,:SAMPLE)', {'TITLE': title, 'IDENTIFIER': identifier, 'SAMPLE': has_sample, 'TAG': tag})
         else:
-            if(hasSample and row['SAMPLE'] == 0):
+            movie_id = row['MOVIE_ID']
+            if(has_sample and row['SAMPLE'] == 0):
                 self.__db.update('UPDATE MOVIE SET SAMPLE = 1 WHERE MOVIE_ID = :ID', {'ID': row['MOVIE_ID']})
-            if(hasMagnet and row['MAGNET'] == 0):
-                self.__db.update('UPDATE MOVIE SET MAGNET = 1 WHERE MOVIE_ID = :ID', {'ID': row['MOVIE_ID']})
         self.__db.commit()
+        # 获取magnet链接
+        self.get_magnet_link(movie_id, body, url, dir_path)
         # 下载sample图片
-        # if(hasSample):
-        #     hasSample
-        #     threads = []
-        #     for i, sample in enumerate(sample_box):
-        #         url = sample.find('img')['src']
-        #         task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
-        #         threads.append(task)
-        #         task.start()
-        #         task.join()
-        #         time.sleep(1)
+        if(row is None or (has_sample and row['SAMPLE'] == 0)):
+            threads = []
+            for i, sample in enumerate(sample_box):
+                url = sample.find('img')['src']
+                task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
+                threads.append(task)
+            self.startThreads(threads, num=2, sleep=2)
 
     # 获取magnet链接
-    def get_magnet_link(self, body, referer, dir_path):
+    def get_magnet_link(self, movie_id, body, referer, dir_path):
         url = self.__host + self.__get_magnet_path
         gid = re.search('var gid = (.*?);', body).group(1)
         img = re.search("var img = '(.*?)';", body).group(1)
@@ -161,12 +180,14 @@ class JavBus():
         soup = BeautifulSoup(ret, "html.parser")
         tags = soup.find_all('tr')
         if(len(tags) > 0):
-            fo = open("{parent}/magnet.txt".format(parent=dir_path), "a+")
+            self.__db.begin()
             for tag in tags:
-                href = tag.find_all('td')[0].find('a')['href']
+                link = tag.find_all('td')[0].find('a')['href']
                 time = tag.find_all('td')[2].find('a').text.strip()
-                fo.write("{href} {time}\n".format(href=href, time=time))
-            fo.close()
+                row = self.__db.count('SELECT COUNT(*) AS TOTAL FROM DOWNLOAD_LINK WHERE MOVIE_ID = :MOVIE_ID AND LINK = :LINK', {'MOVIE_ID': movie_id, 'LINK': link})
+                if(row == 0):
+                    self.__db.insert('INSERT INTO DOWNLOAD_LINK(MOVIE_ID,LINK,PUBLISH_TIME) VALUES(:MOVIE_ID,:LINK,:PUBLISH_TIME)', {'MOVIE_ID': movie_id, 'LINK': link, 'PUBLISH_TIME': time})
+            self.__db.commit()
         return len(tags) > 0
 
     def startThreads(self, threads, num=1, sleep=1):
@@ -189,10 +210,10 @@ class JavBus():
         ret = self.__visitor.send_request(self.__host).visit()
         movie_list = self.get_movie_list(ret)
         threads = []
-        for index, movie in enumerate(movie_list[:5]):
+        for index, movie in enumerate(movie_list[:1]):
             task = threading.Thread(target=self.visit_single, args=(movie,))
             threads.append(task)
-        self.startThreads(threads=threads, num=2, sleep=1)
+        self.startThreads(threads=threads, num=2, sleep=2)
 
 
 JavBus(Visitor(), Mysql()).run()

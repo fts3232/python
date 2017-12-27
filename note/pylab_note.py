@@ -18,6 +18,7 @@ font = FontProperties(fname=r"c:\windows\fonts\SimSun.ttc", size=14)
 # gray() 设置默认colormap为线性灰度色图
 # axis([xmin，xmax，ymin，ymax]) 显示坐标轴，参数为'off'：不显示,'square'：横纵坐标的单位刻度不同，但一定是方形,'equal'：横纵坐标的单位刻度相同，不一定是方形
 # contour() 绘制轮廓图
+# savefig(path) 保存图片
 # [a,b] = hist(x,n=10) 绘制直方图 
 # x是一维向量，函数功能是将x中的最小和最大值之间的区间等分n份，横坐标是x值，纵坐标是该值的个数。
 # 返回的a是落在该区间内的个数，b是该区间的起始位置坐标。

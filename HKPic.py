@@ -3,6 +3,8 @@ from Visitor import Visitor
 import time
 import os
 import re
+import pickle
+from Mysql import Mysql
 
 
 class HKPic(Visitor):
@@ -21,27 +23,39 @@ class HKPic(Visitor):
     __forum_path = '/forum.php?mod=forumdisplay&action=list&fid=215&filter=typeid&typeid=1042'
     # 访问的域名
     __host = None
+    # db类
+    __db = None
 
-    def __init__(self, visitor):
+    def __init__(self, visitor, db):
         self.__visitor = visitor
+        self.__db = db
 
     # 获取域名
     def get_host(self):
-        body = self.__visitor.send_request(self.__publish_url).visit()
-        pattern = re.compile(r'(.*)<br><br>')
-        matches = pattern.findall(body)
-        urls_list = []
-        flag = False
-        for match in matches:
-            if(match == '最新IP'):
-                flag = True
-                continue
-            elif(match == '比思備用域名'):
-                break
-            if(flag is True):
-                urls_list.append(match)
-        print(urls_list)
-        self.__host = self.__visitor.ping_list(urls_list)
+        if(os.path.exists('./HKPic/host.pkl') is True):
+            fo = open('./HKPic/host.pkl', 'rb+')
+            ret = fo.read()
+            self.__host = pickle.loads(ret)
+            print('读取之前的host记录: ' + self.__host)
+        else:
+            body = self.__visitor.send_request(self.__publish_url).visit()
+            pattern = re.compile(r'(.*)<br><br>')
+            matches = pattern.findall(body)
+            urls_list = []
+            flag = False
+            for match in matches:
+                if(match == '最新IP'):
+                    flag = True
+                    continue
+                elif(match == '比思備用域名'):
+                    break
+                if(flag is True):
+                    urls_list.append(match)
+            print(urls_list)
+            self.__host = self.__visitor.ping_list(urls_list)
+            fo = open('./HKPic/host.pkl', 'wb+')
+            fo.write(pickle.dumps(self.__host))
+            fo.close()
         return self.__host
 
     # 登录
@@ -62,6 +76,8 @@ class HKPic(Visitor):
         return child_dir
 
     def run(self):
+        if(os.path.exists('./HKPic') is False):
+            os.mkdir('./HKPic')
         self.get_host()
         self.login()
         body = self.__visitor.send_request(self.__host + self.__forum_path).visit()
@@ -90,4 +106,4 @@ class HKPic(Visitor):
                 break
 
 
-HKPic(Visitor()).run()
+HKPic(Visitor(), Mysql()).run()
