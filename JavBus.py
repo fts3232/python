@@ -5,7 +5,7 @@ import time
 import os
 import re
 import pickle
-from Mysql import Mysql
+from Mysql import ConnectionPool
 
 
 class JavBus():
@@ -18,19 +18,21 @@ class JavBus():
     __host = None
     # vistor类
     __visitor = None
-    # db类
-    __db = None
+    # 连接池
+    __pool = None
+    # 需要爬的页数
+    __page = 2
 
-    def __init__(self, visitor, db):
+    def __init__(self, visitor, ConnectionPool):
         self.__visitor = visitor
-        self.__db = db
-        self.checkTable()
+        self.__pool = ConnectionPool
 
     # 创建数据表
-    def checkTable(self):
+    def check_table(self):
         try:
+            conn = self.__pool.conn()
             sql = "SHOW TABLES LIKE 'MOVIE'"
-            ret = self.__db.select(sql)
+            ret = conn.select(sql)
             if(len(ret) == 0):
                 sql = "CREATE TABLE MOVIE(\
                        `MOVIE_ID` INT NOT NULL AUTO_INCREMENT,\
@@ -44,9 +46,9 @@ class JavBus():
                        )\
                        ENGINE=InnoDB\
                        DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;"
-                ret = self.__db.query(sql)
+                ret = conn.query(sql)
             sql = "SHOW TABLES LIKE 'LOG'"
-            ret = self.__db.select(sql)
+            ret = conn.select(sql)
             if(len(ret) == 0):
                 sql = "CREATE TABLE LOG(\
                        `LOG_ID` INT NOT NULL AUTO_INCREMENT,\
@@ -57,9 +59,9 @@ class JavBus():
                        )\
                        ENGINE=InnoDB\
                        DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;"
-                ret = self.__db.query(sql)
+                ret = conn.query(sql)
             sql = "SHOW TABLES LIKE 'DOWNLOAD_LINK'"
-            ret = self.__db.select(sql)
+            ret = conn.select(sql)
             if(len(ret) == 0):
                 sql = "CREATE TABLE DOWNLOAD_LINK(\
                        `LINK_ID` INT NOT NULL AUTO_INCREMENT,\
@@ -71,7 +73,8 @@ class JavBus():
                        )\
                        ENGINE=InnoDB\
                        DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;"
-                ret = self.__db.query(sql)
+                ret = conn.query(sql)
+            conn.release()
         except Exception as e:
             print('检查数据库失败')
             print(repr(e))
@@ -126,6 +129,7 @@ class JavBus():
     # 访问详情页
     def visit_single(self, url):
         body = self.__visitor.send_request(url).visit()
+        conn = self.__pool.conn()
         if(body is not None):
             soup = BeautifulSoup(body, "html.parser")
             # 番号
@@ -145,8 +149,8 @@ class JavBus():
             has_sample = 1 if len(sample_box) > 0 else 0
             print("番号：{identifier} 片名：{title} 封面图片：{cover}".format(identifier=identifier, title=title, cover=cover))
             # 插入数据
-            self.__db.begin()
-            row = self.__db.find('SELECT MOVIE_ID,SAMPLE FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
+            conn.begin()
+            row = conn.find('SELECT MOVIE_ID,SAMPLE FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
             if(row is None):
                 # 分类标签
                 tags = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')
@@ -162,42 +166,41 @@ class JavBus():
                             category.append(category_tag.find('a').text)
                         break
                 category = ','.join(category)
-                movie_id = self.__db.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,SAMPLE) VALUES(:IDENTIFIER,:TITLE,:TAG,:SAMPLE)', {'TITLE': title, 'IDENTIFIER': identifier, 'SAMPLE': has_sample, 'TAG': category})
+                movie_id = conn.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,SAMPLE) VALUES(:IDENTIFIER,:TITLE,:TAG,:SAMPLE)', {'TITLE': title, 'IDENTIFIER': identifier, 'SAMPLE': has_sample, 'TAG': category})
             else:
                 movie_id = row['MOVIE_ID']
                 if(has_sample and row['SAMPLE'] == 0):
-                    self.__db.update('UPDATE MOVIE SET SAMPLE = 1 WHERE MOVIE_ID = :ID', {'ID': row['MOVIE_ID']})
-            self.__db.commit()
+                    conn.update('UPDATE MOVIE SET SAMPLE = 1 WHERE MOVIE_ID = :ID', {'ID': row['MOVIE_ID']})
             # 获取magnet链接
-            # self.get_magnet_link(movie_id, body, url, dir_path)
-            # 下载sample图片
-            # if(row is None or (has_sample and row['SAMPLE'] == 0)):
-            #     threads = []
-            #     for i, sample in enumerate(sample_box):
-            #         url = sample.find('img')['src']
-            #         task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
-            #         threads.append(task)
-            #     self.startThreads(threads, num=2, sleep=2)
+            self.get_magnet_link(conn, movie_id, body, url, dir_path)
+            conn.commit()
+            conn.release()
+            下载sample图片
+            if(row is None or (has_sample and row['SAMPLE'] == 0)):
+                threads = []
+                for i, sample in enumerate(sample_box):
+                    url = sample.find('img')['src']
+                    task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
+                    threads.append(task)
+                self.startThreads(threads, num=2, sleep=2)
 
     # 获取magnet链接
-    def get_magnet_link(self, movie_id, body, referer, dir_path):
+    def get_magnet_link(self, conn, movie_id, body, referer, dir_path):
         url = self.__host + self.__get_magnet_path
         gid = re.search('var gid = (.*?);', body).group(1)
         img = re.search("var img = '(.*?)';", body).group(1)
         url = url + "?gid={gid}&img={img}&uc=0&lang=zh".format(gid=gid, img=img)
         ret = self.__visitor.send_request(url, options={"referer": referer}).visit()
-        soup = BeautifulSoup(ret, "html.parser")
-        tags = soup.find_all('tr')
-        if(len(tags) > 0):
-            self.__db.begin()
-            for tag in tags:
-                link = tag.find_all('td')[0].find('a')['href']
-                time = tag.find_all('td')[2].find('a').text.strip()
-                row = self.__db.count('SELECT COUNT(*) AS TOTAL FROM DOWNLOAD_LINK WHERE MOVIE_ID = :MOVIE_ID AND LINK = :LINK', {'MOVIE_ID': movie_id, 'LINK': link})
-                if(row == 0):
-                    self.__db.insert('INSERT INTO DOWNLOAD_LINK(MOVIE_ID,LINK,PUBLISH_TIME) VALUES(:MOVIE_ID,:LINK,:PUBLISH_TIME)', {'MOVIE_ID': movie_id, 'LINK': link, 'PUBLISH_TIME': time})
-            self.__db.commit()
-        return len(tags) > 0
+        if(ret is not None):
+            soup = BeautifulSoup(ret, "html.parser")
+            tags = soup.find_all('tr')
+            if(len(tags) > 0):
+                for tag in tags:
+                    link = tag.find_all('td')[0].find('a')['href']
+                    time = tag.find_all('td')[2].find('a').text.strip()
+                    row = conn.count('SELECT COUNT(*) AS TOTAL FROM DOWNLOAD_LINK WHERE MOVIE_ID = :MOVIE_ID AND LINK = :LINK', {'MOVIE_ID': movie_id, 'LINK': link})
+                    if(row == 0):
+                        conn.insert('INSERT INTO DOWNLOAD_LINK(MOVIE_ID,LINK,PUBLISH_TIME) VALUES(:MOVIE_ID,:LINK,:PUBLISH_TIME)', {'MOVIE_ID': movie_id, 'LINK': link, 'PUBLISH_TIME': time})
 
     def startThreads(self, threads, num=1, sleep=1):
         arr = []
@@ -213,16 +216,38 @@ class JavBus():
                 time.sleep(sleep)
 
     def run(self):
+        self.check_table()
         if(os.path.exists('./JavBus') is False):
             os.mkdir('./JavBus')
         self.get_host()
-        ret = self.__visitor.send_request(self.__host).visit()
-        movie_list = self.get_movie_list(ret)
-        threads = []
-        for index, movie in enumerate(movie_list):
-            task = threading.Thread(target=self.visit_single, args=(movie,))
-            threads.append(task)
-        self.startThreads(threads=threads, num=2, sleep=2)
+        page = 0
+        while(page < self.__page):
+            page += 1
+            ret = self.__visitor.send_request(self.__host).visit()
+            movie_list = self.get_movie_list(ret)
+            temp = movie_list
+            for index, movie in enumerate(temp):
+                temp[index] = "'" + movie.replace(self.__host + '/', '') + "'"
+            temp = ','.join(temp)
+            conn = self.__pool.conn()
+            count = conn.count('SELECT COUNT(*) FROM MOVIE WHERE IDENTIFIER IN(' + temp + ')')
+            if(count == 30):
+                continue
+            threads = []
+            for index, movie in enumerate(movie_list):
+                task = threading.Thread(target=self.visit_single, args=(movie,))
+                threads.append(task)
+            self.startThreads(threads=threads, num=2, sleep=2)
+        self.__pool.close()
 
 
-JavBus(Visitor(), Mysql()).run()
+config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
+    'db': 'JavBus',
+    'charset': 'utf8',
+    'max_connection': 10,
+    'min_connection': 2,
+}
+JavBus(Visitor(), ConnectionPool(config)).run()
