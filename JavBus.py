@@ -81,12 +81,17 @@ class JavBus():
 
     # 获取域名
     def get_host(self):
-        if(os.path.exists('./JavBus/host.pkl') is True):
+        try:
+            if(os.path.exists('./JavBus/host.pkl') is not  True):
+                raise Exception('文件不存在')
             fo = open('./JavBus/host.pkl', 'rb+')
             ret = fo.read()
             self.__host = pickle.loads(ret)
             print('读取之前的host记录: ' + self.__host)
-        else:
+            ret = self.__visitor.ping(self.__host)
+            if(ret['alive'] is not True):
+                raise Exception('旧有记录ping不通')
+        except Exception as e:
             body = self.__visitor.send_request(self.__publish_page).visit()
             soup = BeautifulSoup(body, "html.parser")
             tags = soup.find_all('a')
@@ -98,6 +103,7 @@ class JavBus():
             fo = open('./JavBus/host.pkl', 'wb+')
             fo.write(pickle.dumps(self.__host))
             fo.close()
+            print('host: ' + self.__host)
         return self.__host
 
     # 获取列表
@@ -175,7 +181,7 @@ class JavBus():
             self.get_magnet_link(conn, movie_id, body, url, dir_path)
             conn.commit()
             conn.release()
-            下载sample图片
+            # 下载sample图片
             if(row is None or (has_sample and row['SAMPLE'] == 0)):
                 threads = []
                 for i, sample in enumerate(sample_box):
@@ -223,9 +229,9 @@ class JavBus():
         page = 0
         while(page < self.__page):
             page += 1
-            ret = self.__visitor.send_request(self.__host).visit()
+            ret = self.__visitor.send_request(self.__host + '/page/' + str(page)).visit()
             movie_list = self.get_movie_list(ret)
-            temp = movie_list
+            temp = movie_list.copy()
             for index, movie in enumerate(temp):
                 temp[index] = "'" + movie.replace(self.__host + '/', '') + "'"
             temp = ','.join(temp)

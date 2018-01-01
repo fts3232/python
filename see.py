@@ -1,6 +1,7 @@
 import math  
 import random  
-   
+
+
 # 神经网络3层, 1个隐藏层; 4个input和1个output  
 network = [4, [16], 1]  
 # 遗传算法相关  
@@ -13,6 +14,7 @@ historic = 0
 low_historic = False  
 score_sort = -1  
 n_child = 1  
+
 
 # 激活函数  
 def sigmoid(z):  

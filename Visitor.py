@@ -38,6 +38,9 @@ class VisitResult:
             print('{url} 访问成功'.format(url=self.__url))
         return ret
 
+    def get_result(self):
+        return self.__result
+
 
 class Visitor:
     '访问类'
@@ -116,9 +119,12 @@ class Visitor:
             ms = 'unkown'
         print("ping {host} 完成，平均时间为{time}".format(host=host, time=ms))
         ret = {'host': host, 'url': url, 'time': ms, 'alive': alive}
-        if(ret['alive'] is True and (self.__result is None or ret['time'] <= self.__result['time'])):
-            self.__result = ret
-        return self.__result
+        try:
+            if(ret['alive'] is True and (self.__result is None or ret['time'] <= self.__result['time'])):
+                self.__result = ret
+                return self.__result
+        except Exception as e:
+            return ret
 
     def ping_list(self, urls):
         threads = []
@@ -131,3 +137,4 @@ class Visitor:
             thread.join()
         print(self.__result)
         return self.__result['url']
+
