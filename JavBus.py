@@ -1,11 +1,9 @@
 from bs4 import BeautifulSoup
-from Visitor import Visitor
 import threading
 import time
 import os
 import re
 import pickle
-from Mysql import ConnectionPool
 
 
 class JavBus():
@@ -23,9 +21,12 @@ class JavBus():
     # 需要爬的页数
     __page = 2
 
-    def __init__(self, visitor, ConnectionPool):
+    __stdout = None
+
+    def __init__(self, visitor, ConnectionPool, stdout=print):
         self.__visitor = visitor
         self.__pool = ConnectionPool
+        self.__stdout = stdout
 
     # 创建数据表
     def check_table(self):
@@ -76,18 +77,18 @@ class JavBus():
                 ret = conn.query(sql)
             conn.release()
         except Exception as e:
-            print('检查数据库失败')
-            print(repr(e))
+            self.__stdout('检查数据库失败')
+            self.__stdout(repr(e))
 
     # 获取域名
     def get_host(self):
         try:
-            if(os.path.exists('./JavBus/host.pkl') is not  True):
+            if(os.path.exists('./JavBus/host.pkl') is not True):
                 raise Exception('文件不存在')
             fo = open('./JavBus/host.pkl', 'rb+')
             ret = fo.read()
             self.__host = pickle.loads(ret)
-            print('读取之前的host记录: ' + self.__host)
+            self.__stdout('读取之前的host记录: ' + self.__host)
             ret = self.__visitor.ping(self.__host)
             if(ret['alive'] is not True):
                 raise Exception('旧有记录ping不通')
@@ -98,12 +99,12 @@ class JavBus():
             urls_list = []
             for tag in tags:
                 urls_list.append(tag['href'])
-            print(urls_list)
+            self.__stdout(urls_list)
             self.__host = self.__visitor.ping_list(urls_list)
             fo = open('./JavBus/host.pkl', 'wb+')
             fo.write(pickle.dumps(self.__host))
             fo.close()
-            print('host: ' + self.__host)
+            self.__stdout('host: ' + self.__host)
         return self.__host
 
     # 获取列表
@@ -113,7 +114,7 @@ class JavBus():
         movie_list = []
         for tag in tags:
             movie_list.append(tag['href'])
-        print(movie_list)
+        self.__stdout(movie_list)
         return movie_list
 
     # download sample图片
@@ -153,7 +154,7 @@ class JavBus():
             # 是否存在sample图片
             sample_box = soup.find_all('a', {"class": "sample-box"})
             has_sample = 1 if len(sample_box) > 0 else 0
-            print("番号：{identifier} 片名：{title} 封面图片：{cover}".format(identifier=identifier, title=title, cover=cover))
+            self.__stdout("番号：{identifier} 片名：{title} 封面图片：{cover}".format(identifier=identifier, title=title, cover=cover))
             # 插入数据
             conn.begin()
             row = conn.find('SELECT MOVIE_ID,SAMPLE FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
@@ -240,20 +241,8 @@ class JavBus():
             if(count == 30):
                 continue
             threads = []
-            for index, movie in enumerate(movie_list):
+            for index, movie in enumerate(movie_list[:5]):
                 task = threading.Thread(target=self.visit_single, args=(movie,))
                 threads.append(task)
             self.startThreads(threads=threads, num=2, sleep=2)
         self.__pool.close()
-
-
-config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '',
-    'db': 'JavBus',
-    'charset': 'utf8',
-    'max_connection': 10,
-    'min_connection': 2,
-}
-JavBus(Visitor(), ConnectionPool(config)).run()
