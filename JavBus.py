@@ -114,7 +114,7 @@ class JavBus():
         movie_list = []
         for tag in tags:
             movie_list.append(tag['href'])
-        self.__stdout(movie_list)
+        # self.__stdout(str(movie_list))
         return movie_list
 
     # download sample图片
@@ -146,8 +146,8 @@ class JavBus():
             dir_path = self.get_dir(identifier)
             # 封面图
             cover = soup.find('a', {"class": "bigImage"}).find('img')['src']
-            if(os.path.exists(os.path.join(dir_path, "cover.jpg")) is False):
-                self.__visitor.send_request(cover, options={"referer": url}).download(dir_path, "cover.jpg")
+            # if(os.path.exists(os.path.join(dir_path, "cover.jpg")) is False):
+            #     self.__visitor.send_request(cover, options={"referer": url}).download(dir_path, "cover.jpg")
             # 标题
             title = soup.find('h3').text
             title = title.replace(identifier + ' ', '')
@@ -156,40 +156,40 @@ class JavBus():
             has_sample = 1 if len(sample_box) > 0 else 0
             self.__stdout("番号：{identifier} 片名：{title} 封面图片：{cover}".format(identifier=identifier, title=title, cover=cover))
             # 插入数据
-            conn.begin()
-            row = conn.find('SELECT MOVIE_ID,SAMPLE FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
-            if(row is None):
-                # 分类标签
-                tags = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')
-                category_tag_index = None
-                category = []
-                for index, tag in enumerate(tags):
-                    if(tag.has_attr('class') and 'header' in tag['class']):
-                        category_tag_index = index + 1
-                        continue
-                    if(index == category_tag_index):
-                        category_tags = tag.find_all('span', {"class": "genre"})
-                        for category_tag in category_tags:
-                            category.append(category_tag.find('a').text)
-                        break
-                category = ','.join(category)
-                movie_id = conn.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,SAMPLE) VALUES(:IDENTIFIER,:TITLE,:TAG,:SAMPLE)', {'TITLE': title, 'IDENTIFIER': identifier, 'SAMPLE': has_sample, 'TAG': category})
-            else:
-                movie_id = row['MOVIE_ID']
-                if(has_sample and row['SAMPLE'] == 0):
-                    conn.update('UPDATE MOVIE SET SAMPLE = 1 WHERE MOVIE_ID = :ID', {'ID': row['MOVIE_ID']})
-            # 获取magnet链接
-            self.get_magnet_link(conn, movie_id, body, url, dir_path)
-            conn.commit()
+            # conn.begin()
+            # row = conn.find('SELECT MOVIE_ID,SAMPLE FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
+            # if(row is None):
+            #     # 分类标签
+            #     tags = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')
+            #     category_tag_index = None
+            #     category = []
+            #     for index, tag in enumerate(tags):
+            #         if(tag.has_attr('class') and 'header' in tag['class']):
+            #             category_tag_index = index + 1
+            #             continue
+            #         if(index == category_tag_index):
+            #             category_tags = tag.find_all('span', {"class": "genre"})
+            #             for category_tag in category_tags:
+            #                 category.append(category_tag.find('a').text)
+            #             break
+            #     category = ','.join(category)
+            #     movie_id = conn.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,SAMPLE) VALUES(:IDENTIFIER,:TITLE,:TAG,:SAMPLE)', {'TITLE': title, 'IDENTIFIER': identifier, 'SAMPLE': has_sample, 'TAG': category})
+            # else:
+            #     movie_id = row['MOVIE_ID']
+            #     if(has_sample and row['SAMPLE'] == 0):
+            #         conn.update('UPDATE MOVIE SET SAMPLE = 1 WHERE MOVIE_ID = :ID', {'ID': row['MOVIE_ID']})
+            # # 获取magnet链接
+            # self.get_magnet_link(conn, movie_id, body, url, dir_path)
+            # conn.commit()
             conn.release()
             # 下载sample图片
-            if(row is None or (has_sample and row['SAMPLE'] == 0)):
-                threads = []
-                for i, sample in enumerate(sample_box):
-                    url = sample.find('img')['src']
-                    task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
-                    threads.append(task)
-                self.startThreads(threads, num=2, sleep=2)
+            # if(row is None or (has_sample and row['SAMPLE'] == 0)):
+            #     threads = []
+            #     for i, sample in enumerate(sample_box):
+            #         url = sample.find('img')['src']
+            #         task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
+            #         threads.append(task)
+            #     self.startThreads(threads, num=2, sleep=2)
 
     # 获取magnet链接
     def get_magnet_link(self, conn, movie_id, body, referer, dir_path):
@@ -223,6 +223,7 @@ class JavBus():
                 time.sleep(sleep)
 
     def run(self):
+        self.__stdout('开始爬取数据...')
         self.check_table()
         if(os.path.exists('./JavBus') is False):
             os.mkdir('./JavBus')
@@ -231,18 +232,20 @@ class JavBus():
         while(page < self.__page):
             page += 1
             ret = self.__visitor.send_request(self.__host + '/page/' + str(page)).visit()
-            movie_list = self.get_movie_list(ret)
-            temp = movie_list.copy()
-            for index, movie in enumerate(temp):
-                temp[index] = "'" + movie.replace(self.__host + '/', '') + "'"
-            temp = ','.join(temp)
-            conn = self.__pool.conn()
-            count = conn.count('SELECT COUNT(*) FROM MOVIE WHERE IDENTIFIER IN(' + temp + ')')
-            if(count == 30):
-                continue
-            threads = []
-            for index, movie in enumerate(movie_list[:5]):
-                task = threading.Thread(target=self.visit_single, args=(movie,))
-                threads.append(task)
-            self.startThreads(threads=threads, num=2, sleep=2)
+            if(ret is not None):
+                movie_list = self.get_movie_list(ret)
+                temp = movie_list.copy()
+                for index, movie in enumerate(temp):
+                    temp[index] = "'" + movie.replace(self.__host + '/', '') + "'"
+                temp = ','.join(temp)
+                conn = self.__pool.conn()
+                count = conn.count('SELECT COUNT(*) FROM MOVIE WHERE IDENTIFIER IN(' + temp + ')')
+                if(count == 30):
+                    continue
+                threads = []
+                for index, movie in enumerate(movie_list[:5]):
+                    task = threading.Thread(target=self.visit_single, args=(movie,))
+                    threads.append(task)
+                self.startThreads(threads=threads, num=2, sleep=2)
         self.__pool.close()
+        self.__stdout('结束...')
