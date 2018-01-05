@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtWidgets import QWidget, QToolTip, QPushButton, QApplication, QMessageBox, QMainWindow, QAction, QTextEdit, QGridLayout, QLabel, QLineEdit, QSlider, QLCDNumber
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtWidgets import QStackedWidget, QWidget, QToolTip, QPushButton, QApplication, QMessageBox, QMainWindow, QAction, QTextEdit, QGridLayout, QLabel, QLineEdit, QSlider, QLCDNumber
+from PyQt5.QtGui import QIcon, QFont, QImage, QPixmap
 from PyQt5.QtCore import Qt, QCoreApplication, pyqtSignal, QObject
 import sys
 # pyqt5
@@ -32,6 +32,13 @@ import sys
 #       Qt.Key_xxx ：xxx键
 #   sender() 获取发送信号者
 #   close() 关闭
+#   deleteLater() 删除widget
+#   setAlignment() 设置对齐方式
+#       Qt.AlignCenter ：居中
+#       Qt.AlignTop ：顶部对齐
+#       Qt.AlignLeft ： 左对齐
+#       Qt.AlignRight ： 右对齐
+#   setWordWrap(True) 自动换行
 #
 # QIcon(path) icon基类
 #
@@ -93,9 +100,11 @@ import sys
 # QLineEdit 单行文本框基类
 #
 # QLabel 标签基类
+#   setPixmap(QPixmap) 设置图片
 #
 # QGridLayout() 网格布局
 #   addWidget(widget,row,column) 添加widget
+#   removeWidget(widget) 删除widget
 #   setSpacing(space) 设置网格距离
 #
 # QSlider(Qt.Horizontal) slider基类
@@ -106,6 +115,14 @@ import sys
 #
 # pyqtSignal() 信号源
 #    emit() 发送信号
+#
+# QPixmap(path) 一个用于处理图像的部件
+#
+# QStackedWidget 分页布局
+#   addWidget(widget)
+#   currentIndex() 当前页面索引
+#   setCurrentIndex(index) 切换页面
+#   count() 总页数
 #
 
 app = QApplication(sys.argv)
@@ -135,7 +152,7 @@ text = QTextEdit()
 grid.addWidget(text, 1, 1)
 # 按钮
 run_btn = QPushButton('启动')
-# run_btn.clicked.connect(splider)
+run_btn.clicked.connect(splider)
 grid.addWidget(run_btn, 2, 1)
 play_btn = QPushButton('播放')
 grid.addWidget(play_btn, 2, 2)
