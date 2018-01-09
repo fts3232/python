@@ -7,16 +7,7 @@ import sys
 from Visitor import Visitor
 from Mysql import ConnectionPool
 import threading
-
-config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '',
-    'db': 'JavBus',
-    'charset': 'utf8',
-    'max_connection': 10,
-    'min_connection': 2,
-}
+import math
 
 
 # 子线程不能直接append，所以在子线程发送信号给主线程的信号槽，让主线程执行append
@@ -25,20 +16,17 @@ def send_signal(message):
 
 
 def my_print(message):
-    text.append(message)
-
-
-class MySignal(QObject):
-    signal = pyqtSignal(str)
+    print(message)
+    # text.append(message)
 
 
 def run():
-    count = a.count()
-    currentIndex = a.currentIndex()
+    count = pages.count()
+    currentIndex = pages.currentIndex()
     if(currentIndex + 1 < count):
-        a.setCurrentIndex(currentIndex + 1)
+        pages.setCurrentIndex(currentIndex + 1)
     else:
-        a.setCurrentIndex(0)
+        pages.setCurrentIndex(0)
     # status = run_btn.text()
     # if(status == '启动'):
     #     run_btn.setText('暂停')
@@ -54,115 +42,196 @@ def splider():
     mainWindow.statusBar().showMessage('爬取结束...')
 
 
-def create_page():
-    db = pool.conn()
-    ret = db.select('select * from MOVIE')
-    page = QWidget()
-    # grid = QGridLayout()
-    # grid.setSpacing(10)
-    # page.setLayout(grid)
-    offset_x = 0
-    offset_y = 0
-    space = 10
-    for x in ret[:15]:
+class MySignal(QObject):
+    print_signal = pyqtSignal(str)
+    show_single_page = pyqtSignal(str)
+
+
+class Gui:
+    __app = None
+    __mainWindow = None
+    __pages = None
+    __signal = None
+    __back_page = None
+
+    def __init__(self):
+        # 应用
+        self.__app = QApplication(sys.argv)
+        # 主窗口
+        self.__mainWindow = QMainWindow()
+        # 主窗口大小
+        self.__mainWindow.setGeometry(300, 300, 940, 600)
+        # 主窗口标题
+        self.__mainWindow.setWindowTitle('Title')
+        # 主窗口icon
+        self.__mainWindow.setWindowIcon(QIcon('../favicon.ico'))
+        # 菜单栏
+        menubar = self.__mainWindow.menuBar()
+        menu = menubar.addMenu('menu')
+        menu2 = menubar.addMenu('menu2')
+        # 状态栏
+        self.__mainWindow.statusBar().showMessage('这里是状态栏...')
+        # 信号
+        self.__signal = MySignal()
+        self.__signal.show_single_page.connect(my_print)
+        # signal.signal.connect(my_print)
+        pass
+
+    def setUI(self):
+        widget = QWidget()
+        self.__mainWindow.setCentralWidget(widget)
+        # 布局 网格间隔为10
+        grid = QGridLayout()
+        grid.setSpacing(10)
+        widget.setLayout(grid)
+        # 页面
+        self.__pages = QStackedWidget()
+        self.create_console_page(self.__pages)
+        self.create_single_page(self.__pages)
+        self.create_list_page(self.__pages)
+        self.__pages.setCurrentIndex(2)
+        grid.addWidget(self.__pages, 1, 1)
+        # play_btn = QPushButton('播放')
+        # grid.addWidget(play_btn, 2, 2)
+        # download_btn = QPushButton('下载')
+        # grid.addWidget(download_btn, 2, 3)
+
+    def show(self):
+        # 显示主窗口
+        self.__mainWindow.show()
+        # 主循环
+        sys.exit(self.__app.exec_())
+
+    def create_single_page(self, widget):
+        page = QWidget()
+        # 图片
         label = QLabel(parent=page)
-        img = QPixmap('./JavBus/2017-12-27\ANY-002/cover.jpg')
+        img = QPixmap('./asdasdno_wm.jpg')
         label.setPixmap(img)
-        label.setGeometry(QRect(offset_x, offset_y, 150, 100))
+        label.setGeometry(QRect(0, 30, 680, 480))
         label.setScaledContents(True)
         label.setAlignment(Qt.AlignCenter)
-        offset_x += 150 + space
-        if(offset_x==800):
-            offset_x = 0
-            offset_y += 100 + space
-        # grid.addWidget(label, row, column)
+        # 标题
+        label = QLabel('片名:', parent=page)
+        label.setObjectName('title')
+        label.adjustSize()
+        label.setWordWrap(True)
+        label.setAlignment(Qt.AlignLeft)
+        label.setGeometry(QRect(710, 40, 210, 50))
+        # tag
+        label = QLabel('Tag:', parent=page)
+        label.setObjectName('tag')
+        label.adjustSize()
+        label.setWordWrap(True)
+        label.setAlignment(Qt.AlignLeft)
+        label.setGeometry(QRect(710, 90, 210, 50))
+        # 按钮
+        back_btn = QPushButton('后退', parent=page)
+        back_btn.setGeometry(QRect(0, 0, 50, 20))
+        back_btn.clicked.connect(self.back_page)
+        download_btn = QPushButton('下载', parent=page)
+        download_btn.setGeometry(QRect(710, 140, 50, 20))
+        play_btn = QPushButton('播放', parent=page)
+        play_btn.setGeometry(QRect(770, 140, 50, 20))
+        widget.addWidget(page)
 
-        # label = QLabel(x['TITLE'],parent=page)
-        #label.adjustSize()
-        #label.setWordWrap(True)
-        #label.setAlignment(Qt.AlignCenter)
-        # label.setGeometry(QRect(60, 150, 21, 16))
-        # grid.addWidget(label, row + 1, column)
-        # column += 1
-        # if(column > 4):
-        #     row += 2
-        #     column = 0
-    a.addWidget(page)
+    def create_console_page(self, widget):
+        page = QWidget()
+        widget.addWidget(page)
+
+    def create_list_page(self, widget):
+        db = pool.conn()
+        size = 6
+        ret = db.select('select * from MOVIE')
+        count = len(ret)
+        offset = math.ceil(count / size)
+        start = 0
+        for x in list(range(offset)):
+            end = start + size
+            page = QWidget()
+            self.create_list_page_item(page, ret[start:end])
+            start = end
+            widget.addWidget(page)
+
+    def box_click(self, data):
+        return lambda x: self.show_single_page(data)
+
+    def show_single_page(self, data):
+        self.__back_page = self.__pages.currentIndex()
+        self.__pages.setCurrentIndex(1)
+        title = self.__pages.findChild((QLabel, ), 'title')
+        title.setText(data['TITLE'])
+        tag = self.__pages.findChild((QLabel, ), 'tag')
+        tag.setText(data['TAG'])
+        pass
+
+    def create_list_page_item(self, widget, data):
+        offset_x = 0
+        offset_y = 0
+        space = 10
+        for x in data:
+            label = QLabel(parent=widget)
+            # img = QPixmap('./JavBus/2017-12-27\ANY-002/cover.jpg')
+            img = QPixmap('./asdasdno_wm.jpg')
+            label.setPixmap(img)
+            label.setGeometry(QRect(offset_x, offset_y, 300, 200))
+            label.setScaledContents(True)
+            label.setAlignment(Qt.AlignCenter)
+            label.mousePressEvent = self.box_click(x)
+            offset_y += 200 + space
+
+            label = QLabel(x['TITLE'], parent=widget)
+            label.adjustSize()
+            label.setWordWrap(True)
+            label.setAlignment(Qt.AlignCenter)
+            label.setGeometry(QRect(offset_x, offset_y, 300, 50))
+
+            # btn = QPushButton('详情页', parent=widget)
+            # btn.setGeometry(QRect(offset_x, offset_y, 50, 20))
+            # btn.clicked.connect(self.a(x))
+
+            offset_x += 300 + space
+            offset_y -= 200 + space
+            if(offset_x == 930):
+                offset_x = 0
+                offset_y += 250 + space
+        # 按钮
+        prev_btn = QPushButton('上一页', parent=widget)
+        prev_btn.setGeometry(QRect(0, 520, 50, 20))
+        prev_btn.clicked.connect(self.prev_page)
+        next_btn = QPushButton('下一页', parent=widget)
+        next_btn.setGeometry(QRect(870, 520, 50, 20))
+        next_btn.clicked.connect(self.next_page)
+
+    def back_page(self):
+        self.__pages.setCurrentIndex(self.__back_page)
+
+    def next_page(self):
+        count = self.__pages.count()
+        currentIndex = self.__pages.currentIndex()
+        if(currentIndex + 1 < count):
+            self.__pages.setCurrentIndex(currentIndex + 1)
+        pass
+
+    def prev_page(self):
+        currentIndex = self.__pages.currentIndex()
+        if(currentIndex - 1 >= 2):
+            self.__pages.setCurrentIndex(currentIndex - 1)
+        pass
 
 
+config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
+    'db': 'JavBus',
+    'charset': 'utf8',
+    'max_connection': 10,
+    'min_connection': 2,
+}
 pool = ConnectionPool(config)
 task = threading.Thread(target=splider)
 task.setDaemon(True)
-
-# 应用
-app = QApplication(sys.argv)
-# 主窗口
-mainWindow = QMainWindow()
-widget = QWidget()
-# 主窗口大小
-mainWindow.setGeometry(300, 300, 800, 600)
-# 主窗口标题
-mainWindow.setWindowTitle('Title')
-# 主窗口icon
-mainWindow.setWindowIcon(QIcon('../favicon.ico'))
-# 菜单栏
-menubar = mainWindow.menuBar()
-menu = menubar.addMenu('menu')
-menu2 = menubar.addMenu('menu2')
-# 状态栏
-mainWindow.statusBar().showMessage('这里是状态栏...')
-# 信号
-signal = MySignal()
-signal.signal.connect(my_print)
-# 布局 网格间隔为10
-grid = QGridLayout()
-grid.setSpacing(10)
-widget.setLayout(grid)
-mainWindow.setCentralWidget(widget)
-# 文本框
-# text = QTextEdit()
-# grid.addWidget(text, 1, 1)
-# text.deleteLater()
-a = QStackedWidget()
-create_page()
-# # page1
-# page1 = QWidget()
-# grid1 = QGridLayout()
-# grid1.setSpacing(10)
-# page1.setLayout(grid1)
-# label1 = QLabel("add a image file")
-# grid1.addWidget(label1, 1, 1)
-# a.addWidget(page1)
-# # page2
-# page2 = QWidget()
-# grid2 = QGridLayout()
-# grid2.setSpacing(10)
-# page2.setLayout(grid2)
-# label2 = QLabel("add2 a image file")
-# grid2.addWidget(label2, 1, 1)
-# a.addWidget(page2)
-# # page3
-# page3 = QWidget()
-# grid3 = QGridLayout()
-# grid3.setSpacing(10)
-# page3.setLayout(grid3)
-# label3 = QLabel("add3 a image file")
-# grid3.addWidget(label3, 1, 1)
-# a.addWidget(page3)
-# label = QLabel("add a image file")
-# label.setPixmap(QPixmap('./favicon.ico'))
-grid.addWidget(a, 1, 1)
-
-# 按钮
-run_btn = QPushButton('启动')
-run_btn.clicked.connect(run)
-grid.addWidget(run_btn, 2, 1)
-# play_btn = QPushButton('播放')
-# grid.addWidget(play_btn, 2, 2)
-# download_btn = QPushButton('下载')
-# grid.addWidget(download_btn, 2, 3)
-
-# 显示主窗口
-mainWindow.show()
-# 主循环
-sys.exit(app.exec_())
+g = Gui()
+g.setUI()
+g.show()

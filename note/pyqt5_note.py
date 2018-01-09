@@ -39,6 +39,7 @@ import sys
 #       Qt.AlignLeft ： 左对齐
 #       Qt.AlignRight ： 右对齐
 #   setWordWrap(True) 自动换行
+#   mousePressEvent() 鼠标点击事件
 #
 # QIcon(path) icon基类
 #

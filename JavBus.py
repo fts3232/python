@@ -156,7 +156,7 @@ class JavBus():
             has_sample = 1 if len(sample_box) > 0 else 0
             self.__stdout("番号：{identifier} 片名：{title} 封面图片：{cover}".format(identifier=identifier, title=title, cover=cover))
             # 插入数据
-            # conn.begin()
+            conn.begin()
             # row = conn.find('SELECT MOVIE_ID,SAMPLE FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
             # if(row is None):
             #     # 分类标签
