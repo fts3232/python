@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QStackedWidget, QWidget, QToolTip, QPushButton, QApplication, QMessageBox, QMainWindow, QAction, QTextEdit, QGridLayout, QLabel, QLineEdit, QSlider, QLCDNumber
-from PyQt5.QtGui import QIcon, QFont, QPixmap
-from PyQt5.QtCore import Qt, QCoreApplication, pyqtSignal, QObject, QThread, QRect
+from PyQt5.QtGui import QIcon, QFont, QImage, QPixmap
+from PyQt5.QtCore import Qt, QCoreApplication, pyqtSignal, QObject, QThread, QRect, QFile
 from JavBus import JavBus
 import sys
 from Visitor import Visitor
 from Mysql import ConnectionPool
 import threading
 import math
+import subprocess
 
 
 # 子线程不能直接append，所以在子线程发送信号给主线程的信号槽，让主线程执行append
@@ -59,6 +60,12 @@ class Gui:
         self.__app = QApplication(sys.argv)
         # 主窗口
         self.__mainWindow = QMainWindow()
+        # 样式表
+        file = QFile('style.qss')
+        file.open(QFile.ReadOnly)
+        styleSheet = file.readAll()
+        styleSheet = str(styleSheet, encoding='utf8')
+        self.__mainWindow.setStyleSheet(styleSheet)
         # 主窗口大小
         self.__mainWindow.setGeometry(300, 300, 940, 600)
         # 主窗口标题
@@ -67,8 +74,8 @@ class Gui:
         self.__mainWindow.setWindowIcon(QIcon('../favicon.ico'))
         # 菜单栏
         menubar = self.__mainWindow.menuBar()
-        menu = menubar.addMenu('menu')
-        menu2 = menubar.addMenu('menu2')
+        menubar.addMenu('menu')
+        menubar.addMenu('menu2')
         # 状态栏
         self.__mainWindow.statusBar().showMessage('这里是状态栏...')
         # 信号
@@ -106,34 +113,75 @@ class Gui:
         page = QWidget()
         # 图片
         label = QLabel(parent=page)
+        label.setObjectName('big_image')
         img = QPixmap('./asdasdno_wm.jpg')
+        img = img.scaled(680, 450, Qt.KeepAspectRatio)
         label.setPixmap(img)
-        label.setGeometry(QRect(0, 30, 680, 480))
-        label.setScaledContents(True)
+        label.setGeometry(QRect(0, 30, 680, 450))
         label.setAlignment(Qt.AlignCenter)
         # 标题
         label = QLabel('片名:', parent=page)
+        label.adjustSize()
+        label.setWordWrap(True)
+        label.setAlignment(Qt.AlignLeft)
+        label.setGeometry(QRect(710, 40, 210, 20))
+        label = QLabel('', parent=page)
         label.setObjectName('title')
         label.adjustSize()
         label.setWordWrap(True)
         label.setAlignment(Qt.AlignLeft)
-        label.setGeometry(QRect(710, 40, 210, 50))
+        label.setGeometry(QRect(710, 60, 210, 50))
         # tag
         label = QLabel('Tag:', parent=page)
+        label.adjustSize()
+        label.setWordWrap(True)
+        label.setAlignment(Qt.AlignLeft)
+        label.setGeometry(QRect(710, 110, 210, 20))
+        label = QLabel('', parent=page)
         label.setObjectName('tag')
         label.adjustSize()
         label.setWordWrap(True)
         label.setAlignment(Qt.AlignLeft)
-        label.setGeometry(QRect(710, 90, 210, 50))
+        label.setGeometry(QRect(710, 130, 210, 50))
+        # pic
+        offset_x = 0
+        bottom_widget = QWidget(parent=page)
+        bottom_widget.setObjectName('bottom_widget')
+        bottom_widget.setGeometry(QRect(0, 490, 680, 50))
+        for x in list(range(20)):
+            if(x % 2 == 0):
+                pic = './asdasdno_wm.jpg'
+            else:
+                pic = './camera.png'
+            label = QLabel(parent=bottom_widget)
+            label.setObjectName('pic-box')
+            img = QPixmap(pic)
+            img = img.scaled(50, 50, Qt.KeepAspectRatio)
+            label.setPixmap(img)
+            label.setGeometry(QRect(offset_x, 0, 50, 50))
+            label.setAlignment(Qt.AlignCenter)
+            label.mousePressEvent = self.thumbnail_click(pic)
+            offset_x += 60
         # 按钮
         back_btn = QPushButton('后退', parent=page)
         back_btn.setGeometry(QRect(0, 0, 50, 20))
         back_btn.clicked.connect(self.back_page)
         download_btn = QPushButton('下载', parent=page)
-        download_btn.setGeometry(QRect(710, 140, 50, 20))
+        download_btn.setGeometry(QRect(710, 190, 50, 20))
+        download_btn.clicked.connect(self.download)
         play_btn = QPushButton('播放', parent=page)
-        play_btn.setGeometry(QRect(770, 140, 50, 20))
+        play_btn.setGeometry(QRect(770, 190, 50, 20))
+        play_btn.clicked.connect(self.play)
         widget.addWidget(page)
+
+    def thumbnail_click(self, pic):
+        return lambda x: self.change_big_image(pic)
+
+    def change_big_image(self, pic):
+        label = self.__pages.findChild((QLabel, ), 'big_image')
+        img = QPixmap(pic)
+        img = img.scaled(680, 450, Qt.KeepAspectRatio)
+        label.setPixmap(img)
 
     def create_console_page(self, widget):
         page = QWidget()
@@ -211,12 +259,17 @@ class Gui:
         currentIndex = self.__pages.currentIndex()
         if(currentIndex + 1 < count):
             self.__pages.setCurrentIndex(currentIndex + 1)
-        pass
 
     def prev_page(self):
         currentIndex = self.__pages.currentIndex()
         if(currentIndex - 1 >= 2):
             self.__pages.setCurrentIndex(currentIndex - 1)
+
+    def download(self):
+        pass
+
+    def play(self):
+        ret = subprocess.Popen(["ping.exe", host], shell=True, stdout=subprocess.PIPE, cwd=)
         pass
 
 

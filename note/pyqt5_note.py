@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QStackedWidget, QWidget, QToolTip, QPushButton, QApplication, QMessageBox, QMainWindow, QAction, QTextEdit, QGridLayout, QLabel, QLineEdit, QSlider, QLCDNumber
 from PyQt5.QtGui import QIcon, QFont, QImage, QPixmap
-from PyQt5.QtCore import Qt, QCoreApplication, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, QCoreApplication, pyqtSignal, QObject, QFile
 import sys
 # pyqt5
 #
@@ -117,7 +117,9 @@ import sys
 # pyqtSignal() 信号源
 #    emit() 发送信号
 #
-# QPixmap(path) 一个用于处理图像的部件
+# QPixmap(path) 一个用于显示图像的部件
+#
+# QImage(path) 图像像素级的操作
 #
 # QStackedWidget 分页布局
 #   addWidget(widget)
@@ -125,6 +127,12 @@ import sys
 #   setCurrentIndex(index) 切换页面
 #   count() 总页数
 #
+# QFile 加载Qss文件
+#   file = QFile('css.qss')
+#   file.open(QFile.ReadOnly)
+#   styleSheet = file.readAll()
+#   styleSheet = str(styleSheet, encoding='utf8')
+#   app.setStyleSheet(styleSheet)
 
 app = QApplication(sys.argv)
 
