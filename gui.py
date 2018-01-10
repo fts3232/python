@@ -67,7 +67,7 @@ class Gui:
         styleSheet = str(styleSheet, encoding='utf8')
         self.__mainWindow.setStyleSheet(styleSheet)
         # 主窗口大小
-        self.__mainWindow.setGeometry(300, 300, 940, 600)
+        self.__mainWindow.setGeometry(300, 300, 940, 610)
         # 主窗口标题
         self.__mainWindow.setWindowTitle('Title')
         # 主窗口icon
@@ -114,9 +114,6 @@ class Gui:
         # 图片
         label = QLabel(parent=page)
         label.setObjectName('big_image')
-        img = QPixmap('./asdasdno_wm.jpg')
-        img = img.scaled(680, 450, Qt.KeepAspectRatio)
-        label.setPixmap(img)
         label.setGeometry(QRect(0, 30, 680, 450))
         label.setAlignment(Qt.AlignCenter)
         # 标题
@@ -201,14 +198,21 @@ class Gui:
             start = end
             widget.addWidget(page)
 
-    def box_click(self, data):
+    def list_item_click(self, data):
         return lambda x: self.show_single_page(data)
 
     def show_single_page(self, data):
         self.__back_page = self.__pages.currentIndex()
         self.__pages.setCurrentIndex(1)
+
+        big_image = self.__pages.findChild((QLabel, ), 'big_image')
+        img = QPixmap('./JavBus/{identifier}/cover.jpg'.format(identifier=data['IDENTIFIER']))
+        img = img.scaled(680, 450, Qt.KeepAspectRatio)
+        big_image.setPixmap(img)
+
         title = self.__pages.findChild((QLabel, ), 'title')
         title.setText(data['TITLE'])
+
         tag = self.__pages.findChild((QLabel, ), 'tag')
         tag.setText(data['TAG'])
         pass
@@ -220,12 +224,12 @@ class Gui:
         for x in data:
             label = QLabel(parent=widget)
             # img = QPixmap('./JavBus/2017-12-27\ANY-002/cover.jpg')
-            img = QPixmap('./asdasdno_wm.jpg')
+            img = QPixmap('./JavBus/{identifier}/cover.jpg'.format(identifier=x['IDENTIFIER']))
             label.setPixmap(img)
             label.setGeometry(QRect(offset_x, offset_y, 300, 200))
             label.setScaledContents(True)
             label.setAlignment(Qt.AlignCenter)
-            label.mousePressEvent = self.box_click(x)
+            label.mousePressEvent = self.list_item_click(x)
             offset_y += 200 + space
 
             label = QLabel(x['TITLE'], parent=widget)
@@ -233,10 +237,6 @@ class Gui:
             label.setWordWrap(True)
             label.setAlignment(Qt.AlignCenter)
             label.setGeometry(QRect(offset_x, offset_y, 300, 50))
-
-            # btn = QPushButton('详情页', parent=widget)
-            # btn.setGeometry(QRect(offset_x, offset_y, 50, 20))
-            # btn.clicked.connect(self.a(x))
 
             offset_x += 300 + space
             offset_y -= 200 + space
@@ -269,7 +269,7 @@ class Gui:
         pass
 
     def play(self):
-        ret = subprocess.Popen(["ping.exe", host], shell=True, stdout=subprocess.PIPE, cwd=)
+        # ret = subprocess.Popen(["ping.exe", host], shell=True, stdout=subprocess.PIPE, cwd=)
         pass
 
 
@@ -283,8 +283,9 @@ config = {
     'min_connection': 2,
 }
 pool = ConnectionPool(config)
-task = threading.Thread(target=splider)
-task.setDaemon(True)
+# JavBus(Visitor(), pool).run()
+# task = threading.Thread(target=splider)
+# task.setDaemon(True)
 g = Gui()
 g.setUI()
 g.show()
