@@ -1,12 +1,14 @@
+*{padding:0;margin:0;box-sizing: border-box;}
+button{border:none;background:none}
 body{
 	background: #EEEEEB;
-	padding:0;
-	margin:0;
+	font-family: "Helvetica Neue", Helvetica, Arial, STHeiti-Light, STHeiti-Medium, "Microsoft YaHei","Microsoft JhengHei",STHeiti,MingLiu;
 }
 .list-page{
-	margin:10px;
+	margin:10px auto;
 	& .waterfall{
 		position: relative;
+	    margin: 0 auto;
 		& .item{
 			cursor: pointer;
 			width: 280px;
@@ -15,10 +17,13 @@ body{
 		    border: none;
 		    border-radius: 0px;
 		    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+		    opacity: 0;
+		    &.active{
+		    	opacity: 1;
+		    }
 			& img{
 				width: 280px;
 				padding: 10px;
-				box-sizing:border-box;
 			}
 			& .title{
 				border-bottom:1px solid #F2F2F2;
@@ -30,8 +35,5 @@ body{
     			text-align:left;
 			}
 		}
-	}
-	& .pagination{
-		text-align: center;
 	}
 }

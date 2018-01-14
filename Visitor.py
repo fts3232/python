@@ -100,10 +100,13 @@ class Visitor:
         except Exception as e:
             print("发送请求 {url} 失败，错误：{error}，发送次数：{num}".format(url=url, num=self.__total_request_num, error=str(e)))
             repr(e)
-            time.sleep(2)
-            self.__total_request_num += 1
-            if(self.__total_request_num <= self.__max_request_num):
-                self.send_request(url, options=options, data=data)
+            if(e.code != '404'):
+                time.sleep(2)
+                self.__total_request_num += 1
+                if(self.__total_request_num <= self.__max_request_num):
+                    self.send_request(url, options=options, data=data)
+            else:
+                self.__total_request_num = 1
         return VisitResult(url, result)
 
     # ping

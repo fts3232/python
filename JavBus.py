@@ -23,10 +23,17 @@ class JavBus():
 
     __stdout = None
 
+    __path = None
+
     def __init__(self, visitor, ConnectionPool, stdout=print):
         self.__visitor = visitor
         self.__pool = ConnectionPool
         self.__stdout = stdout
+        self.check_table()
+        self.__path = os.path.dirname(__file__) + '/JavBus'
+        if(os.path.exists(self.__path) is False):
+            os.mkdir(self.__path)
+        self.get_host()
 
     # 创建数据表
     def check_table(self):
@@ -83,9 +90,9 @@ class JavBus():
     # 获取域名
     def get_host(self):
         try:
-            if(os.path.exists('./JavBus/host.pkl') is not True):
+            if(os.path.exists(self.__path + '/host.pkl') is not True):
                 raise Exception('文件不存在')
-            fo = open('./JavBus/host.pkl', 'rb+')
+            fo = open(self.__path + '/host.pkl', 'rb+')
             ret = fo.read()
             self.__host = pickle.loads(ret)
             self.__stdout('读取之前的host记录: ' + self.__host)
@@ -101,7 +108,7 @@ class JavBus():
                 urls_list.append(tag['href'])
             self.__stdout(urls_list)
             self.__host = self.__visitor.ping_list(urls_list)
-            fo = open('./JavBus/host.pkl', 'wb+')
+            fo = open(self.__path + '/host.pkl', 'wb+')
             fo.write(pickle.dumps(self.__host))
             fo.close()
             self.__stdout('host: ' + self.__host)
@@ -124,8 +131,8 @@ class JavBus():
 
     # 获取目录
     def get_dir(self, name):
-        today = time.strftime("%Y-%m-%d", time.localtime())
-        parent_dir = "./JavBus"
+        # today = time.strftime("%Y-%m-%d", time.localtime())
+        parent_dir = self.__path
         if(os.path.exists(parent_dir) is False):
             os.mkdir(parent_dir)
         child_dir = "{parent}/{child}".format(parent=parent_dir, child=name)
@@ -186,7 +193,7 @@ class JavBus():
             if(row is None or (has_sample and row['SAMPLE'] == 0)):
                 threads = []
                 for i, sample in enumerate(sample_box):
-                    url = sample.find('img')['src']
+                    url = sample['href']
                     task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
                     threads.append(task)
                 self.startThreads(threads, num=2, sleep=2)
@@ -203,11 +210,12 @@ class JavBus():
             tags = soup.find_all('tr')
             if(len(tags) > 0):
                 for tag in tags:
-                    link = tag.find_all('td')[0].find('a')['href']
-                    time = tag.find_all('td')[2].find('a').text.strip()
-                    row = conn.count('SELECT COUNT(*) AS TOTAL FROM DOWNLOAD_LINK WHERE MOVIE_ID = :MOVIE_ID AND LINK = :LINK', {'MOVIE_ID': movie_id, 'LINK': link})
-                    if(row == 0):
-                        conn.insert('INSERT INTO DOWNLOAD_LINK(MOVIE_ID,LINK,PUBLISH_TIME) VALUES(:MOVIE_ID,:LINK,:PUBLISH_TIME)', {'MOVIE_ID': movie_id, 'LINK': link, 'PUBLISH_TIME': time})
+                    if(tag.find_all('td')[0].find('a') is not None):
+                        link = tag.find_all('td')[0].find('a')['href']
+                        time = tag.find_all('td')[2].find('a').text.strip()
+                        row = conn.count('SELECT COUNT(*) AS TOTAL FROM DOWNLOAD_LINK WHERE MOVIE_ID = :MOVIE_ID AND LINK = :LINK', {'MOVIE_ID': movie_id, 'LINK': link})
+                        if(row == 0):
+                            conn.insert('INSERT INTO DOWNLOAD_LINK(MOVIE_ID,LINK,PUBLISH_TIME) VALUES(:MOVIE_ID,:LINK,:PUBLISH_TIME)', {'MOVIE_ID': movie_id, 'LINK': link, 'PUBLISH_TIME': time})
 
     def startThreads(self, threads, num=1, sleep=1):
         arr = []
@@ -222,12 +230,21 @@ class JavBus():
                 arr = []
                 time.sleep(sleep)
 
+    def search(self, identifiers):
+        self.__stdout('开始爬取数据...')
+        conn = self.__pool.conn()
+        threads = []
+        for identifier in identifiers:
+            count = conn.count('SELECT COUNT(*) FROM MOVIE WHERE IDENTIFIER = :IDENTIFIER', {'IDENTIFIER': identifier})
+            if(count == 0):
+                task = threading.Thread(target=self.visit_single, args=("{host}/{identifier}".format(host=self.__host, identifier=identifier),))
+                threads.append(task)
+        self.startThreads(threads=threads, num=2, sleep=2)
+        conn.release()
+        self.__stdout('结束...')
+
     def run(self):
         self.__stdout('开始爬取数据...')
-        self.check_table()
-        if(os.path.exists('./JavBus') is False):
-            os.mkdir('./JavBus')
-        self.get_host()
         page = 0
         while(page < self.__page):
             page += 1
@@ -243,7 +260,7 @@ class JavBus():
                 if(count == 30):
                     continue
                 threads = []
-                for index, movie in enumerate(movie_list):
+                for index, movie in enumerate(movie_list[:5]):
                     task = threading.Thread(target=self.visit_single, args=(movie,))
                     threads.append(task)
                 self.startThreads(threads=threads, num=2, sleep=2)

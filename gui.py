@@ -283,9 +283,9 @@ config = {
     'min_connection': 2,
 }
 pool = ConnectionPool(config)
-# JavBus(Visitor(), pool).run()
+JavBus(Visitor(), pool).run()
 # task = threading.Thread(target=splider)
 # task.setDaemon(True)
-g = Gui()
-g.setUI()
-g.show()
+# g = Gui()
+# g.setUI()
+# g.show()

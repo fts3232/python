@@ -1,5 +1,4 @@
 import List from './Views/List'
-import Single from './Views/Single'
 import NotFound from './Views/NotFound'
 window.request = superagent;
 //react-router
@@ -13,7 +12,6 @@ ReactDOM.render((
 	<Router history={history}>
 		<Switch>
 	        <Route path="/" exact component={List} />
-	        <Route path="/single" component={Single} />
 	        <Route component={NotFound}/>
 		</Switch>
 	</Router>
