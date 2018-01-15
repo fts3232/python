@@ -22,6 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('play/', view.play),
     path('getData/', view.getData),
-    path('search/', view.search),
     path('scan/', view.scan)
 ]

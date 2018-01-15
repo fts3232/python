@@ -5,9 +5,8 @@ class List extends React.Component {
 	constructor(props){
 		super(props);
         this.state = {
-            data:[
-                
-            ],
+            data:[],
+            search:'',
             rows_height:[],
             end:false,
             page:1,
@@ -16,8 +15,9 @@ class List extends React.Component {
     getData(){
         let _this = this;
         let page = _this.state.page
+        let search = _this.state.search
         new Promise((resolve,reject)=>{
-            request.get('http://localhost:8000/getData/?p='+page+'&size=12')
+            request.get('http://localhost:8000/getData/?p='+page+'&size=24&search='+search)
                    .end(function(err, res){
                         if(res.ok){
                             resolve(JSON.parse(res.text))
@@ -103,21 +103,37 @@ class List extends React.Component {
         obj.show()
         obj.setState({data:val})
     }
+    search(data){
+        let _this = this
+        this.setState({'search':data,'data':[],'page':1,'end':false,rows_height:[]},()=>{
+            _this.getData()
+        })
+    }
+    top(){
+        $('html').animate({'scrollTop':0})
+    }
     render() {
         return (
             <div ref="app" className="list-page">
-                <Header />
+                <Header search={this.search.bind(this)}/>
                 <div className="waterfall" ref='waterfall'>
                     {this.state.data.map((val)=>{
                         return (
                             <div className="item" onClick={this.onClick.bind(this,val)}>
                                 <img src={val.IMAGE}/>
-                                <p className="title">{val.TITLE}</p>
+                                <p className="title">
+                                    {val.TITLE}
+                                    {val.PLAY?(
+                                        <span className="can-play">可播放</span>
+                                    ):null}
+                                </p>
+                                
                             </div>
                         )
                     })}
                 </div>
                 <Dialog ref='dialog'/>
+                <div className="top" onClick={this.top.bind(this)}>Top</div>
             </div>
         )
     }

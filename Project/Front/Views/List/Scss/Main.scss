@@ -33,7 +33,22 @@ body{
     			margin: 0;
     			padding:10px;
     			text-align:left;
+    			& .can-play{
+				    display: block;
+				    color: #34e234;
+				    padding-top:10px;
+				}
 			}
+
 		}
+	}
+	& .top{
+	    position: fixed;
+	    right: 20px;
+	    bottom: 20px;
+	    border: 1px solid #a9a8a8;
+	    color: #a9a8a8;
+	    padding: 5px 10px;
+	    cursor: pointer;
 	}
 }

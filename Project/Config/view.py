@@ -35,8 +35,7 @@ def findMovie(root, filename):
             if(os.path.isfile(temp) and ret[1].lower() in ['.avi', '.mp4']):
                 path = path.replace('(', '^(')
                 path = path.replace(')', '^)')
-                subprocess.Popen([path], shell=True, stdout=subprocess.PIPE, cwd=root)
-                returnData = True
+                returnData = {'root': root, 'path': path}
                 break
             elif(os.path.isdir(temp)):
                 returnData = findMovie(temp, filename)
@@ -44,15 +43,14 @@ def findMovie(root, filename):
 
 
 def play(request):
+    root = 'E:/迅雷下载'
     identifier = str(request.GET['identifier'])
-    ret = findMovie('E:/迅雷下载', identifier)
+    ret = findMovie(root, identifier)
     msg = '播放成功' if(ret is True) else '播放失败'
+    if(ret is not False):
+        subprocess.Popen([ret['path']], shell=True, stdout=subprocess.PIPE, cwd=ret['root'])
     ret = {'msg': msg, 'status': ret}
     return HttpResponse(json.dumps(ret), content_type="application/json")
-
-
-def search(request):
-    pass
 
 
 def scan(request):
@@ -62,28 +60,34 @@ def scan(request):
         temp = "{root}/{path}".format(root=root, path=path)
         ret = os.path.splitext(temp)
         if((os.path.isfile(temp) and ret[1].lower() in ['.avi', '.mp4']) or os.path.isdir(temp)):
-            ret = re.search('([A-Za-z]{2,})-?(\d{2,})', path)
-            if(ret is not None):
-                num = ret.group(2)
+            ret = re.findall('([A-Za-z]{2,})-?(\d{2,})', path)
+            if(len(ret) > 0):
+                ret = ret[-1]
+                num = ret[1]
                 if(len(num) >= 5):
                     num = num.replace('00', '')
-                identifiers.append("{series}-{num}".format(series=ret.group(1), num=num))
-    # JavBus(Visitor(), pool).search(identifiers)
-    ret = {'msg': '1', 'status': False, 'list':identifiers}
+                identifiers.append("{series}-{num}".format(series=ret[0], num=num))
+    JavBus(Visitor(), pool).search(identifiers)
+    ret = {'msg': '扫描成功', 'status': True, 'list': identifiers}
     return HttpResponse(json.dumps(ret), content_type="application/json")
 
 
 def getData(request):
     p = int(request.GET['p'])
     size = int(request.GET['size'])
+    search = str(request.GET['search'])
     db = pool.conn()
     offset = (p - 1) * size
-    ret = db.select('select MOVIE_ID,TITLE,IDENTIFIER,TAG from MOVIE LIMIT {offset},{size}'.format(offset=offset, size=size))
+    if(search == ''):
+        ret = db.select('select MOVIE_ID,TITLE,IDENTIFIER,TAG from MOVIE LIMIT {offset},{size}'.format(offset=offset, size=size))
+    else:
+        ret = db.select('select MOVIE_ID,TITLE,IDENTIFIER,TAG from MOVIE WHERE IDENTIFIER LIKE :SEARCH OR TITLE LIKE :SEARCH LIMIT {offset},{size}'.format(offset=offset, size=size), {'SEARCH': '%{search}%'.format(search=search)})
     for x in ret:
         path = '../JavBus/{identifier}'.format(identifier=x['IDENTIFIER'])
         sample = []
         x['LINK'] = []
         x['IMAGE'] = ''
+        x['PLAY'] = True if(findMovie('E:/迅雷下载', x['IDENTIFIER'])) else False
         links = db.select('select LINK,PUBLISH_TIME from DOWNLOAD_LINK where MOVIE_ID = :MOVIE_ID', {'MOVIE_ID': x['MOVIE_ID']})
         for link in links:
             link['PUBLISH_TIME'] = str(link['PUBLISH_TIME'])
