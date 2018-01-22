@@ -14,28 +14,31 @@ class VisitResult:
     # 访问的url
     __url = None
 
-    def __init__(self, url, result):
+    __stdout = None
+
+    def __init__(self, url, result, stdout=print):
         self.__result = result
         self.__url = url
+        self.__stdout = stdout
 
     # 下载
     def download(self, path, filename):
         if(self.__result is None):
-            print('{url} 下载失败'.format(url=self.__url))
+            self.__stdout('{url} 下载失败'.format(url=self.__url))
         else:
             fo = open("{path}/{filename}".format(path=path, filename=filename), "wb+")
             fo.write(self.__result)
             fo.close()
-            print('{url} 下载成功'.format(url=self.__url))
+            self.__stdout('{url} 下载成功'.format(url=self.__url))
 
     # 访问
     def visit(self):
         ret = None
         if(self.__result is None):
-            print('{url} 访问失败'.format(url=self.__url))
+            self.__stdout('{url} 访问失败'.format(url=self.__url))
         else:
             ret = self.__result.decode('utf-8', 'ignore')
-            print('{url} 访问成功'.format(url=self.__url))
+            self.__stdout('{url} 访问成功'.format(url=self.__url))
         return ret
 
     def get_result(self):
@@ -51,10 +54,13 @@ class Visitor:
     # opener
     __urlOpener = None
 
-    def __init__(self):
+    __stdout = None
+
+    def __init__(self, stdout=print):
         # 使用cookie
         cookiejar = http.cookiejar.CookieJar()
         self.__urlOpener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookiejar))
+        self.__stdout = stdout
 
     # 生成ip
     def create_ip(self):
@@ -95,12 +101,12 @@ class Visitor:
             response = self.__urlOpener.open(request)
             result = response.read()
             response.close()
-            print("发送请求 {url} 成功，发送次数：{num}".format(url=url, num=self.__total_request_num))
+            self.__stdout("发送请求 {url} 成功，发送次数：{num}".format(url=url, num=self.__total_request_num))
             self.__total_request_num = 1
         except Exception as e:
-            print("发送请求 {url} 失败，错误：{error}，发送次数：{num}".format(url=url, num=self.__total_request_num, error=str(e)))
+            self.__stdout("发送请求 {url} 失败，错误：{error}，发送次数：{num}".format(url=url, num=self.__total_request_num, error=str(e)))
             repr(e)
-            if(e.code != 404):
+            if(hasattr(e, "code") and e.code != 404):
                 time.sleep(2)
                 self.__total_request_num += 1
                 if(self.__total_request_num <= self.__max_request_num):
@@ -120,7 +126,7 @@ class Visitor:
         except Exception as e:
             alive = False
             ms = 'unkown'
-        print("ping {host} 完成，平均时间为{time}".format(host=host, time=ms))
+        self.__stdout("ping {host} 完成，平均时间为{time}".format(host=host, time=ms))
         ret = {'host': host, 'url': url, 'time': ms, 'alive': alive}
         try:
             if(ret['alive'] is True and (self.__result is None or ret['time'] <= self.__result['time'])):
@@ -138,6 +144,5 @@ class Visitor:
             task.start()
         for thread in threads:
             thread.join()
-        print(self.__result)
+        self.__stdout(self.__result)
         return self.__result['url']
-

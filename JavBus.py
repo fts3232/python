@@ -4,6 +4,8 @@ import time
 import os
 import re
 import pickle
+from Visitor import Visitor
+from datetime import datetime
 
 
 class JavBus():
@@ -25,8 +27,8 @@ class JavBus():
 
     __path = None
 
-    def __init__(self, visitor, ConnectionPool, stdout=print):
-        self.__visitor = visitor
+    def __init__(self, ConnectionPool, stdout=print):
+        self.__visitor = Visitor(stdout)
         self.__pool = ConnectionPool
         self.__stdout = stdout
         self.check_table()
@@ -47,9 +49,11 @@ class JavBus():
                        `CATEGORY` TINYINT(1) NOT NULL DEFAULT 1,\
                        `IDENTIFIER` VARCHAR(30) NOT NULL,\
                        `TITLE`  VARCHAR(255) NOT NULL,\
-                       `TAG` TEXT NOT NULL,\
-                       `SAMPLE` TINYINT(1) NOT NULL DEFAULT 1,\
+                       `STAR`  VARCHAR(255) DEFAULT NULL,\
+                       `TAG`  VARCHAR(255) DEFAULT NULL,\
+                       `PUBLISH_TIME` DATETIME NOT NULL,\
                        `CREATED_TIME` DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                       `UPDATED_TIME` DATETIME DEFAULT NULL,\
                        PRIMARY KEY (`MOVIE_ID`)\
                        )\
                        ENGINE=InnoDB\
@@ -78,6 +82,43 @@ class JavBus():
                        `PUBLISH_TIME` DATE NOT NULL,\
                        `CREATED_TIME` DATETIME DEFAULT CURRENT_TIMESTAMP,\
                        PRIMARY KEY (`LINK_ID`)\
+                       )\
+                       ENGINE=InnoDB\
+                       DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;"
+                ret = conn.query(sql)
+            sql = "SHOW TABLES LIKE 'TAG'"
+            ret = conn.select(sql)
+            if(len(ret) == 0):
+                sql = "CREATE TABLE TAG(\
+                       `TAG_ID` INT NOT NULL AUTO_INCREMENT,\
+                       `TAG_NAME` VARCHAR(30) NOT NULL,\
+                       `CREATED_TIME` DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                       PRIMARY KEY (`TAG_ID`)\
+                       )\
+                       ENGINE=InnoDB\
+                       DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;"
+                ret = conn.query(sql)
+            sql = "SHOW TABLES LIKE 'STAR'"
+            ret = conn.select(sql)
+            if(len(ret) == 0):
+                sql = "CREATE TABLE STAR(\
+                       `STAR_ID` INT NOT NULL AUTO_INCREMENT,\
+                       `STAR_NAME`  TEXT NOT NULL,\
+                       `CREATED_TIME` DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                       PRIMARY KEY (`STAR_ID`)\
+                       )\
+                       ENGINE=InnoDB\
+                       DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;"
+                ret = conn.query(sql)
+            sql = "SHOW TABLES LIKE 'SAMPLE'"
+            ret = conn.select(sql)
+            if(len(ret) == 0):
+                sql = "CREATE TABLE SAMPLE(\
+                       `SAMPLE_ID` INT NOT NULL AUTO_INCREMENT,\
+                       `MOVIE_ID`  INT NOT NULL,\
+                       `URL`  VARCHAR(255) NOT NULL,\
+                       `CREATED_TIME` DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                       PRIMARY KEY (`SAMPLE_ID`)\
                        )\
                        ENGINE=InnoDB\
                        DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;"
@@ -124,11 +165,6 @@ class JavBus():
         # self.__stdout(str(movie_list))
         return movie_list
 
-    # download sample图片
-    def download_sample(self, url, path, filename):
-        ret = self.__visitor.send_request(url).download(path, filename)
-        return ret
-
     # 获取目录
     def get_dir(self, name):
         # today = time.strftime("%Y-%m-%d", time.localtime())
@@ -137,20 +173,21 @@ class JavBus():
             os.mkdir(parent_dir)
         child_dir = "{parent}/{child}".format(parent=parent_dir, child=name)
         if(os.path.exists(child_dir) is False):
-            os.mkdir(child_dir)
+            os.makedirs(child_dir)
         return child_dir
 
     # 访问详情页
-    def visit_single(self, url):
+    def visit_single(self, url, movie_id=None):
         body = self.__visitor.send_request(url).visit()
         conn = self.__pool.conn()
+        conn.begin()
         if(body is not None):
             soup = BeautifulSoup(body, "html.parser")
             # 番号
             identifier = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')[0].find_all('span')[1]
             identifier = identifier.text
             # 生成文件夹
-            dir_path = self.get_dir(identifier)
+            dir_path = self.get_dir('Movie/' + identifier)
             # 封面图
             cover = soup.find('a', {"class": "bigImage"}).find('img')['src']
             if(os.path.exists(os.path.join(dir_path, "cover.jpg")) is False):
@@ -163,40 +200,67 @@ class JavBus():
             has_sample = 1 if len(sample_box) > 0 else 0
             self.__stdout("番号：{identifier} 片名：{title} 封面图片：{cover}".format(identifier=identifier, title=title, cover=cover))
             # 插入数据
-            conn.begin()
-            row = conn.find('SELECT MOVIE_ID,SAMPLE FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
-            if(row is None):
+            movie_row = conn.find('SELECT MOVIE_ID FROM MOVIE WHERE TITLE LIKE :TITLE AND IDENTIFIER = :IDENTIFIER', {'TITLE': title, 'IDENTIFIER': identifier})
+            if(movie_id is not None or movie_row is None):
                 # 分类标签
                 tags = soup.find('div', {"class": ["col-md-3", "info"]}).find_all('p')
-                category_tag_index = None
-                category = []
-                for index, tag in enumerate(tags):
-                    if(tag.has_attr('class') and 'header' in tag['class']):
-                        category_tag_index = index + 1
-                        continue
-                    if(index == category_tag_index):
-                        category_tags = tag.find_all('span', {"class": "genre"})
-                        for category_tag in category_tags:
-                            category.append(category_tag.find('a').text)
-                        break
-                category = ','.join(category)
-                movie_id = conn.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,SAMPLE) VALUES(:IDENTIFIER,:TITLE,:TAG,:SAMPLE)', {'TITLE': title, 'IDENTIFIER': identifier, 'SAMPLE': has_sample, 'TAG': category})
+                tag = []
+                star = []
+                if(tags is not None):
+                    # tag
+                    node_index = 0
+                    for index, node in enumerate(tags):
+                        if(node.text == '類別:'):
+                            node_index = index + 1
+                            continue
+                        if(node_index == index):
+                            tag_tags = node.find_all('span', {"class": "genre"})
+                            for tag_tag in tag_tags:
+                                row = conn.find('SELECT TAG_ID FROM TAG WHERE TAG_NAME = :TAG_NAME', {'TAG_NAME': tag_tag.find('a').text})
+                                if(row is None):
+                                    tag_id = conn.insert('INSERT INTO TAG(TAG_NAME) VALUES(:TAG_NAME)', {'TAG_NAME': tag_tag.find('a').text})
+                                else:
+                                    tag_id = row['TAG_ID']
+                                tag.append(str(tag_id))
+                # star
+                star_tags = soup.find_all('a', {"class": ["avatar-box"]})
+                star_dir = self.get_dir('Star')
+                for star_tag in star_tags:
+                    star_pic = star_tag.find('img')['src']
+                    star_name = star_tag.find('span').text
+                    if(os.path.exists(os.path.join(star_dir, '{name}.jpg'.format(name=star_name))) is False):
+                        self.__visitor.send_request(star_pic).download(star_dir, '{name}.jpg'.format(name=star_name))
+                    row = conn.find('SELECT STAR_ID FROM STAR WHERE STAR_NAME = :STAR_NAME', {'STAR_NAME': star_name})
+                    if(row is None):
+                        star_id = conn.insert('INSERT INTO STAR(STAR_NAME) VALUES(:STAR_NAME)', {'STAR_NAME': star_name})
+                    else:
+                        star_id = row['STAR_ID']
+                    star.append(str(star_id))
+
+                publish_time = tags[1].get_text()
+                publish_time = publish_time.replace('發行日期: ', '')
+                publish_time = publish_time if(publish_time != '0000-00-00') else str(datetime.now().strftime("%Y-%m-%d"))
+                tag = ','.join(tag) if(tag != []) else None
+                star = ','.join(star) if(star != []) else None
+                if(movie_id is None):
+                    movie_id = conn.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,STAR,PUBLISH_TIME) VALUES(:IDENTIFIER,:TITLE,:TAG,:STAR, :PUBLISH_TIME)', {'TITLE': title, 'IDENTIFIER': identifier, 'STAR': star, 'TAG': tag, 'PUBLISH_TIME': publish_time})
+                else:
+                    conn.update('UPDATE MOVIE SET IDENTIFIER = :IDENTIFIER, TITLE = :TITLE, TAG = :TAG, STAR = :STAR, PUBLISH_TIME = :PUBLISH_TIME WHERE MOVIE_ID = :MOVIE_ID', {'TITLE': title, 'IDENTIFIER': identifier, 'STAR': star, 'TAG': tag, 'PUBLISH_TIME': publish_time, 'MOVIE_ID': movie_id})
             else:
-                movie_id = row['MOVIE_ID']
-                if(has_sample and row['SAMPLE'] == 0):
-                    conn.update('UPDATE MOVIE SET SAMPLE = 1 WHERE MOVIE_ID = :ID', {'ID': row['MOVIE_ID']})
+                movie_id = movie_row['MOVIE_ID']
             # # 获取magnet链接
             self.get_magnet_link(conn, movie_id, body, url, dir_path)
-            conn.commit()
-            conn.release()
             # 下载sample图片
-            if(row is None or (has_sample and row['SAMPLE'] == 0)):
-                threads = []
+            if(movie_row is None or has_sample):
                 for i, sample in enumerate(sample_box):
-                    url = sample['href']
-                    task = threading.Thread(target=self.download_sample, args=(url, dir_path, "sample-{i}.jpg".format(i=i)))
-                    threads.append(task)
-                self.startThreads(threads, num=2, sleep=2)
+                    count = conn.count('SELECT COUNT(SAMPLE_ID) FROM SAMPLE WHERE URL = :URL', {'URL': sample['href']})
+                    if(count == 0):
+                        conn.insert('INSERT INTO SAMPLE(MOVIE_ID,URL) VALUES(:MOVIE_ID,:URL)', {'MOVIE_ID': movie_id, 'URL': sample['href']})
+        else:
+            identifier = url.replace(self.__host + '/', '')
+            row = conn.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,PUBLISH_TIME) VALUES(:IDENTIFIER,:TITLE,NOW())', {'TITLE': identifier, 'IDENTIFIER': identifier})
+        conn.commit()
+        conn.release()
 
     # 获取magnet链接
     def get_magnet_link(self, conn, movie_id, body, referer, dir_path):
@@ -239,8 +303,13 @@ class JavBus():
             if(count == 0):
                 task = threading.Thread(target=self.visit_single, args=("{host}/{identifier}".format(host=self.__host, identifier=identifier),))
                 threads.append(task)
-        self.startThreads(threads=threads, num=2, sleep=2)
+        self.startThreads(threads=threads, num=2, sleep=2.5)
         conn.release()
+        self.__stdout('结束...')
+
+    def updateMovie(self, movie_id, identifier):
+        self.__stdout('开始爬取数据...')
+        self.visit_single("{host}/{identifier}".format(host=self.__host, identifier=identifier), movie_id)
         self.__stdout('结束...')
 
     def run(self):
@@ -260,9 +329,9 @@ class JavBus():
                 if(count == 30):
                     continue
                 threads = []
-                for index, movie in enumerate(movie_list[:5]):
+                for index, movie in enumerate(movie_list):
                     task = threading.Thread(target=self.visit_single, args=(movie,))
                     threads.append(task)
                 self.startThreads(threads=threads, num=2, sleep=2)
-        self.__pool.close()
+        #self.__pool.close()
         self.__stdout('结束...')

@@ -14,7 +14,7 @@ var config = {
 	'test':{
 		'ENV':'test',
 		'ROOT_PATH':path.resolve(__dirname),
-		'ROOT':'/static/',
+		'ROOT':'/',
 		'APP_PATH':path.resolve(path.resolve(__dirname), 'Front'),
 		'BUILD_PATH':path.resolve(path.resolve(__dirname), 'Build'),
 		'ASSET_PATH':path.resolve(path.resolve(__dirname),'Assets')
@@ -23,7 +23,7 @@ var config = {
 	'production':{
 		'ENV':'production',
 		'ROOT_PATH':path.resolve(__dirname),
-		'ROOT':'/static/',
+		'ROOT':'/',
 		'APP_PATH':path.resolve(path.resolve(__dirname), 'Front'),
 		'BUILD_PATH':path.resolve(path.resolve(__dirname), 'Build'),
 		'ASSET_PATH':path.resolve(path.resolve(__dirname),'Assets')
