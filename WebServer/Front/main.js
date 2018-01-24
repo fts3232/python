@@ -1,5 +1,6 @@
 import List from './Views/List'
 import NotFound from './Views/NotFound'
+import Home from './Views/Home';
 window.request = superagent;
 //react-router
 const Router = ReactRouterDOM.Router;
@@ -11,7 +12,7 @@ const history = History.createBrowserHistory();
 ReactDOM.render((
 	<Router history={history}>
 		<Switch>
-	        <Route path="/" exact component={List} />
+	        <Route path="/" exact component={Home} />
 	        <Route component={NotFound}/>
 		</Switch>
 	</Router>
