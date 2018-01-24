@@ -243,7 +243,7 @@ class JavBus():
                 tag = ','.join(tag) if(tag != []) else None
                 star = ','.join(star) if(star != []) else None
                 if(movie_id is None):
-                    movie_id = conn.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,STAR,PUBLISH_TIME) VALUES(:IDENTIFIER,:TITLE,:TAG,:STAR, :PUBLISH_TIME)', {'TITLE': title, 'IDENTIFIER': identifier, 'STAR': star, 'TAG': tag, 'PUBLISH_TIME': publish_time})
+                    movie_id = conn.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,TAG,STAR,PUBLISH_TIME,UPDATED_TIME) VALUES(:IDENTIFIER,:TITLE,:TAG,:STAR, :PUBLISH_TIME, NOW())', {'TITLE': title, 'IDENTIFIER': identifier, 'STAR': star, 'TAG': tag, 'PUBLISH_TIME': publish_time})
                 else:
                     conn.update('UPDATE MOVIE SET IDENTIFIER = :IDENTIFIER, TITLE = :TITLE, TAG = :TAG, STAR = :STAR, PUBLISH_TIME = :PUBLISH_TIME WHERE MOVIE_ID = :MOVIE_ID', {'TITLE': title, 'IDENTIFIER': identifier, 'STAR': star, 'TAG': tag, 'PUBLISH_TIME': publish_time, 'MOVIE_ID': movie_id})
             else:
@@ -258,7 +258,7 @@ class JavBus():
                         conn.insert('INSERT INTO SAMPLE(MOVIE_ID,URL) VALUES(:MOVIE_ID,:URL)', {'MOVIE_ID': movie_id, 'URL': sample['href']})
         else:
             identifier = url.replace(self.__host + '/', '')
-            row = conn.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,PUBLISH_TIME) VALUES(:IDENTIFIER,:TITLE,NOW())', {'TITLE': identifier, 'IDENTIFIER': identifier})
+            row = conn.insert('INSERT INTO MOVIE(IDENTIFIER,TITLE,PUBLISH_TIME,UPDATED_TIME) VALUES(:IDENTIFIER,:TITLE,NOW(), NOW())', {'TITLE': identifier, 'IDENTIFIER': identifier})
         conn.commit()
         conn.release()
 
