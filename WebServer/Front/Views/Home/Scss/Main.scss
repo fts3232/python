@@ -1,0 +1,17 @@
+.home{
+    text-align:center;
+    & .block{
+        width: 200px;
+        height: 200px;
+        display:inline-block;
+        margin-right:50px;
+        margin-top:20%;
+        cursor: pointer
+    }
+}
+.blue{
+    background: blue;
+}
+.red{
+    background: red;
+}

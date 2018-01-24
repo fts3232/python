@@ -1,5 +1,6 @@
-import List from './Views/List'
 import NotFound from './Views/NotFound'
+import Home from './Views/Home';
+import Loader from './Components/Loader';
 window.request = superagent;
 //react-router
 const Router = ReactRouterDOM.Router;
@@ -11,7 +12,8 @@ const history = History.createBrowserHistory();
 ReactDOM.render((
 	<Router history={history}>
 		<Switch>
-	        <Route path="/" exact component={List} />
+	        <Route path="/" exact component={Home} />
+            <Route exact path="/:path" component={Loader} />
 	        <Route component={NotFound}/>
 		</Switch>
 	</Router>
