@@ -18,8 +18,8 @@ class GetDataHandler(tornado.web.RequestHandler):
         self.__movie_model = Movie(self.__db)
         self.__tag_model = Tag(self.__db)
         self.__star_model = Star(self.__db)
-        self.__downloadlink = DownloadLink(self.__db)
-        self.__Sample = Sample(self.__db)
+        self.__downloadlink_model = DownloadLink(self.__db)
+        self.__sample_model = Sample(self.__db)
 
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
@@ -27,12 +27,12 @@ class GetDataHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
     def get(self):
-        p = int(self.get_argument('p', default=1))
-        size = int(self.get_argument('size', default=12))
-        title = str(self.get_argument('title', default=None))
-        star = str(self.get_argument('star', default=None))
-        tag = str(self.get_argument('tag', default=None))
-        offset = (p - 1) * size
+        p = self.get_argument('p', default=1)
+        size = self.get_argument('size', default=12)
+        title = self.get_argument('title', default=None)
+        star = self.get_argument('star', default=None)
+        tag = self.get_argument('tag', default=None)
+        offset = (int(p) - 1) * int(size)
         options = {'size': size, 'title': title, 'star': star, 'tag': tag, 'offset': offset}
         ret = self.getData(options)
         self.__db.release()
@@ -48,7 +48,7 @@ class GetDataHandler(tornado.web.RequestHandler):
             # 发布时间
             x['PUBLISH_TIME'] = x['PUBLISH_TIME'].strftime('%Y-%m-%d')
             # 下载链接
-            links = self.__downloadlink.get(x['MOVIE_ID'])
+            links = self.__downloadlink_model.get(x['MOVIE_ID'])
             x['LINK'] = []
             for link in links:
                 link['PUBLISH_TIME'] = str(link['PUBLISH_TIME'])

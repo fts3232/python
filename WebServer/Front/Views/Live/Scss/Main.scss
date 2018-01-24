@@ -1,0 +1,75 @@
+*{padding:0;margin:0;box-sizing: border-box;}
+button{border:none;background:none}
+body{
+	background: #EEEEEB;
+	font-family: "Helvetica Neue", Helvetica, Arial, STHeiti-Light, STHeiti-Medium, "Microsoft YaHei","Microsoft JhengHei",STHeiti,MingLiu;
+}
+.list-page{
+	margin:10px auto;
+	& .waterfall{
+		position: relative;
+	    margin: 0 auto;
+		& .item{
+			cursor: pointer;
+			width: 280px;
+			background:#fff;
+		    text-align: center;
+		    border: none;
+		    border-radius: 0px;
+		    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+		    opacity: 0;
+		    &.active{
+		    	opacity: 1;
+		    }
+			& img{
+				width: 280px;
+				padding: 10px;
+			    min-height: 150px;
+			    background: #fff;
+			    min-width: 280px;
+			}
+			& .box{
+				border-bottom:1px solid #F2F2F2;
+			    color: #333;
+    			background-color: #FAFAFA;
+				line-height: 1;
+    			margin: 0;
+    			padding:10px;
+    			text-align:left;
+    			& .tag{
+    				margin-top: 10px;
+    				& .can-play{
+    					display: inline-block;
+					    background: #419641;
+					    border-radius:3px;
+    					line-height: 1.5;
+					    color:#fff;
+					    font-size: 12px;
+					    padding:1px 5px;
+				        opacity: .65;
+					}
+    			}
+    			& .info{
+			        color: #CC0000;
+			        font-size:12px;
+			        margin-top: 10px;
+				    margin-right: 10px;
+				    & span{
+				    	margin-right: 10px;
+				    }
+				}
+    			
+			}
+
+		}
+	}
+	& .top{
+	    position: fixed;
+	    right: 20px;
+	    bottom: 20px;
+	    border: 1px solid #a9a8a8;
+	    color: #a9a8a8;
+	    padding: 5px 10px;
+	    cursor: pointer;
+	}
+}

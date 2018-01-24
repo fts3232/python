@@ -6,15 +6,18 @@ class Movie():
 
     def get(self, options):
         where = []
+        whereData = {}
         if(options['title'] is not None):
             where.append("IDENTIFIER LIKE :SEARCH OR TITLE LIKE :SEARCH")
-            whereData = {'SEARCH': '%{search}%'.format(search=where['title'])}
+            whereData = {'SEARCH': '%{search}%'.format(search=options['title'])}
         elif(options['star'] is not None):
             where.append("FIND_IN_SET(:STAR,STAR)")
-            whereData = {'STAR': where['star']}
+            whereData = {'STAR': options['star']}
         elif(options['tag'] is not None):
             where.append("FIND_IN_SET(:TAG,TAG)")
-            whereData = {'TAG': where['tag']}
+            whereData = {'TAG': options['tag']}
         where = ' and '.join(where)
-        sql = 'select MOVIE_ID,TITLE,IDENTIFIER,TAG,STAR,PUBLISH_TIME from MOVIE {where} ORDER BY UPDATED_TIME DESC,PUBLISH_TIME DESC,CREATED_TIME DESC LIMIT {offset},{size}'.format(offset=options['offset'], size=options['size'])
+        if(where != ''):
+            where = 'where ' + where
+        sql = 'select MOVIE_ID,TITLE,IDENTIFIER,TAG,STAR,PUBLISH_TIME from MOVIE {where} ORDER BY UPDATED_TIME DESC,PUBLISH_TIME DESC,CREATED_TIME DESC LIMIT {offset},{size}'.format(offset=options['offset'], size=options['size'], where=where)
         return self.__db.select(sql, whereData)

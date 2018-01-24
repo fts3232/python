@@ -58,33 +58,33 @@ class Connection():
         except Exception as e:
             print("数据库链接失败: " + repr(e))
 
-    def select(self, sql, param=[]):
+    def select(self, sql, param={}):
         sql, param = self.perpare(sql, param)
         self.__cursor.execute(sql, param)
         return self.__cursor.fetchall()
 
-    def find(self, sql, param=[]):
+    def find(self, sql, param={}):
         sql, param = self.perpare(sql, param)
         self.__cursor.execute(sql, param)
         return self.__cursor.fetchone()
 
-    def count(self, sql, param=[]):
+    def count(self, sql, param={}):
         sql, param = self.perpare(sql, param)
         self.__cursor.execute(sql, param)
         row = self.__cursor.fetchone()
         return list(row.values())[0]
 
-    def update(self, sql, param=[]):
+    def update(self, sql, param={}):
         sql, param = self.perpare(sql, param)
         self.__cursor.execute(sql, param)
         return self.__cursor.rowcount
 
-    def delete(self, sql, param=[]):
+    def delete(self, sql, param={}):
         sql, param = self.perpare(sql, param)
         self.__cursor.execute(sql, param)
         return self.__cursor.rowcount
 
-    def perpare(self, sql, param=[]):
+    def perpare(self, sql, param={}):
         if(len(param) == 0):
             return sql, param
         pattern = re.compile(r':\w+')
