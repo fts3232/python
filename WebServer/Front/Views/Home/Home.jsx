@@ -1,5 +1,6 @@
 import css from './Scss/Main.scss';
 import Component from '../../Components/Component'
+const Link = ReactRouterDOM.Link
 class Home extends Component {
 	constructor(props){
 		super(props);
@@ -25,12 +26,11 @@ class Home extends Component {
             }  
         },sp);  */
   }
-
   render() {
     return (
         <div className='home'>
-          <div className="blue" ref="blue"></div>
-          <div className="red"></div>
+          <Link to="/av"><div className="block blue"></div></Link>
+          <div className="block red"></div>
         </div>
     )
   }

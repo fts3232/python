@@ -1,15 +1,17 @@
+.home{
+    text-align:center;
+    & .block{
+        width: 200px;
+        height: 200px;
+        display:inline-block;
+        margin-right:50px;
+        margin-top:20%;
+        cursor: pointer
+    }
+}
 .blue{
-    width: 200px;
-    height: 200px;
     background: blue;
-    position: absolute;
-    top: 0;
-    transition: all 0.1s;
 }
 .red{
-    width: 200px;
-    height: 200px;
     background: red;
-    position: absolute;
-    left: 210px;
 }
