@@ -1,5 +1,6 @@
 import css from './Scss/Main.scss';
-class Dialog extends React.Component {
+import Component from '../../Components/Component';
+class Dialog extends Component {
 	constructor(props){
 		super(props);
         this.state = {

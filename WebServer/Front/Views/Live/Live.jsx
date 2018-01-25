@@ -1,21 +1,8 @@
 import css from './Scss/Main.scss';
-import Dialog from '../Dialog';
-import Header from '../Header';
-import Log from '../Log';
-import Tag from '../Tag';
-class Live extends React.Component {
+import Component from '../../Components/Component';
+class Live extends Component {
 	constructor(props){
 		super(props);
-        this.state = {
-            data:[],
-            title:false,
-            rows_height:[],
-            end:false,
-            page:1,
-            getData:false,
-            star:false,
-            tag:false,
-        }
 	}
     getChildContext(){
         return {
@@ -25,7 +12,7 @@ class Live extends React.Component {
     render() {
         return (
             <div ref="app" className="list-page">
-                
+                <div></div>
             </div>
         )
     }
@@ -36,11 +23,11 @@ Live.childContextTypes = {
 };
 
 Live.PropTypes = {
-    space:React.PropTypes.number
+    
 }
 
 Live.defaultProps = {
-    space:10
+    
 }
 
 //导出组件

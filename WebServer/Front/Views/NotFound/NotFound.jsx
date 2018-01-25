@@ -1,6 +1,7 @@
 import css from './Scss/Main.scss';
+import Component from '../../Components/Component';
 const Link = ReactRouterDOM.Link;
-class NotFound extends React.Component {
+class NotFound extends Component {
 	constructor(props){
 		super(props);
 	}

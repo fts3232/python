@@ -3,7 +3,8 @@ import Dialog from '../Dialog';
 import Header from '../Header';
 import Log from '../Log';
 import Tag from '../Tag';
-class List extends React.Component {
+import Component from '../../Components/Component';
+class List extends Component {
 	constructor(props){
 		super(props);
         this.state = {

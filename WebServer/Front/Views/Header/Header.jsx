@@ -1,5 +1,6 @@
 import css from './Scss/Main.scss';
-class Header extends React.Component {
+import Component from '../../Components/Component';
+class Header extends Component {
   	constructor(props){
   		super(props);
 

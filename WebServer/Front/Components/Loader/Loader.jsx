@@ -19,7 +19,12 @@ class Loader extends Component {
             this.setState({'Component':<Component location={location} />})
 
         }).catch((err)=>{
-            console.log(err);
+            import(/* webpackChunkName: "lazy" */`../../Views/NotFound/index.js`).then((component)=>{
+                let Component = component.default;
+                this.setState({'Component':<Component location={location} />})
+            }).catch((err)=>{
+                console.log(err);
+            })
         });
     }
     componentWillReceiveProps (props){

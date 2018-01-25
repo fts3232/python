@@ -1,6 +1,6 @@
 import css from './Scss/Main.scss';
-import classnames from 'classnames';
-class Tag extends React.Component {
+import Component from '../../Components/Component';
+class Tag extends Component {
 	constructor(props){
 		super(props);
     this.state = {
@@ -36,7 +36,7 @@ class Tag extends React.Component {
   }
   render() {
     return (
-        <div className={classnames('tag-wrapper',{'hidden':!this.state.toggle})}>
+        <div className={this.classnames('tag-wrapper',{'hidden':!this.state.toggle})}>
           <h3>Tag列表</h3>
           <div className="list" ref='list'>
             {this.state.data.map((v)=>{

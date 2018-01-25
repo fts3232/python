@@ -1,6 +1,6 @@
 import css from './Scss/Main.scss';
-import classnames from 'classnames';
-class Log extends React.Component {
+import Component from '../../Components/Component';
+class Log extends Component {
 	constructor(props){
 		super(props);
     this.state = {
@@ -23,7 +23,7 @@ class Log extends React.Component {
   }
   render() {
     return (
-        <div className={classnames('log-wrapper',{'hidden':!this.state.toggle})}>
+        <div className={this.classnames('log-wrapper',{'hidden':!this.state.toggle})}>
           <h3>运行记录</h3>
           <div className="list" ref='list'>
             {this.state.data.map((v)=>{
