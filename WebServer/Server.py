@@ -4,6 +4,7 @@ import sys
 from Handler.GetDataHandler import GetDataHandler
 from Handler.GetTagHandler import GetTagHandler
 from Handler.SocketHandler import SocketHandler
+from Handler.GetLiveHandler import GetLiveHandler
 sys.path.append("../")
 from Mysql import ConnectionPool
 
@@ -30,6 +31,7 @@ application = tornado.web.Application([
     (r"/getData", GetDataHandler, dict(pool=pool)),
     (r"/getTag", GetTagHandler, dict(pool=pool)),
     (r"/socket", SocketHandler, dict(pool=pool)),
+    (r"/getLive",  GetLiveHandler),
     (r"/(.*?)", tornado.web.StaticFileHandler, dict(path='Build', default_filename="index.html")),
     # (r"/css/(.*)", tornado.web.StaticFileHandler, dict(path='Build/css')),
     # (r"/js/(.*)", tornado.web.StaticFileHandler, dict(path='Build/js')),

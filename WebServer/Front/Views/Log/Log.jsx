@@ -23,7 +23,7 @@ class Log extends Component {
   }
   render() {
     return (
-        <div className={this.classnames('log-wrapper',{'hidden':!this.state.toggle})}>
+        <div className={this.classNames('log-wrapper',{'hidden':!this.state.toggle})}>
           <h3>运行记录</h3>
           <div className="list" ref='list'>
             {this.state.data.map((v)=>{

@@ -36,7 +36,7 @@ class Tag extends Component {
   }
   render() {
     return (
-        <div className={this.classnames('tag-wrapper',{'hidden':!this.state.toggle})}>
+        <div className={this.classNames('tag-wrapper',{'hidden':!this.state.toggle})}>
           <h3>Tag列表</h3>
           <div className="list" ref='list'>
             {this.state.data.map((v)=>{
