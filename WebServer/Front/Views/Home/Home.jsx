@@ -11,8 +11,10 @@ class Home extends Component {
   render() {
     return (
         <div className='home'>
-          <Link to="/list"><div className="block blue"></div></Link>
-          <Link to="/live"><div className="block red"></div></Link>
+          <Link to="/av"><div className="block av">A</div></Link>
+          <Link to="/live"><div className="block live">直</div></Link>
+          <Link to="/comic"><div className="block comic">漫</div></Link>
+          <Link to="/setting"><div className="block setting">设</div></Link>
         </div>
     )
   }

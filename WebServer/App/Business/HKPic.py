@@ -1,10 +1,11 @@
 from bs4 import BeautifulSoup
-from Visitor import Visitor
 import time
 import os
 import re
 import pickle
-from Mysql import Mysql
+import sys
+sys.path.append("../")
+from Lib.Visitor import Visitor
 
 
 class HKPic(Visitor):
@@ -26,9 +27,8 @@ class HKPic(Visitor):
     # db类
     __db = None
 
-    def __init__(self, visitor, db):
-        self.__visitor = visitor
-        self.__db = db
+    def __init__(self):
+        self.__visitor = Visitor()
 
     # 获取域名
     def get_host(self):
@@ -53,9 +53,9 @@ class HKPic(Visitor):
                     urls_list.append(match)
             print(urls_list)
             self.__host = self.__visitor.ping_list(urls_list)
-            fo = open('./HKPic/host.pkl', 'wb+')
-            fo.write(pickle.dumps(self.__host))
-            fo.close()
+            # fo = open('./HKPic/host.pkl', 'wb+')
+            # fo.write(pickle.dumps(self.__host))
+            # fo.close()
         return self.__host
 
     # 登录
@@ -76,34 +76,39 @@ class HKPic(Visitor):
         return child_dir
 
     def run(self):
-        if(os.path.exists('./HKPic') is False):
-            os.mkdir('./HKPic')
         self.get_host()
-        self.login()
+        ret = self.login()
         body = self.__visitor.send_request(self.__host + self.__forum_path).visit()
-        soup = BeautifulSoup(body, "html.parser")
-        tags = soup.find_all('a', {'class': 'xst'})
-        today = time.strftime("%m.%d", time.localtime())
-        for tag in tags:
-            if(re.search(today, tag.text)):
-                print(tag.text)
-                body = self.__visitor.send_request("{host}/{path}".format(host=self.__host, path=tag['href'])).visit()
-                pattern = re.compile(r'^(?!使用大陸)+([^<>\n\r]+?)<br />(?:\n\n[^<>\n\r]+?<br />)?(?:\n\n[^<>\n\r]+?<br />)?[\s\S]*?([\s\S]*?)<a href="(.*?)"', re.M)
-                matches = pattern.findall(body)
-                for match in matches:
-                    title = re.sub(r'([\?\\\/\|:\<\>\t\r\n ]+)|(\.\.\.$)', '', match[0])
-                    link = match[2]
-                    dir_path = self.get_dir(title)
-                    soup = BeautifulSoup(match[1], "html.parser")
-                    tags = soup.find_all('img')
-                    if(tags is not None):
-                        for index, tag in enumerate(tags):
-                            self.__visitor.send_request("{host}/{path}".format(host=self.__host, path=tag['file'])).download(dir_path, 'sample-{index}.jpg'.format(index=index))
-                            time.sleep(1)
-                    fo = open("{path}/pan.txt".format(path=dir_path), "w+")
-                    fo.write(link)
-                    fo.close()
-                break
+        print(body)
+        pass
+        # if(os.path.exists('./HKPic') is False):
+        #     os.mkdir('./HKPic')
+        # self.get_host()
+        # self.login()
+        # body = self.__visitor.send_request(self.__host + self.__forum_path).visit()
+        # soup = BeautifulSoup(body, "html.parser")
+        # tags = soup.find_all('a', {'class': 'xst'})
+        # today = time.strftime("%m.%d", time.localtime())
+        # for tag in tags:
+        #     if(re.search(today, tag.text)):
+        #         print(tag.text)
+        #         body = self.__visitor.send_request("{host}/{path}".format(host=self.__host, path=tag['href'])).visit()
+        #         pattern = re.compile(r'^(?!使用大陸)+([^<>\n\r]+?)<br />(?:\n\n[^<>\n\r]+?<br />)?(?:\n\n[^<>\n\r]+?<br />)?[\s\S]*?([\s\S]*?)<a href="(.*?)"', re.M)
+        #         matches = pattern.findall(body)
+        #         for match in matches:
+        #             title = re.sub(r'([\?\\\/\|:\<\>\t\r\n ]+)|(\.\.\.$)', '', match[0])
+        #             link = match[2]
+        #             dir_path = self.get_dir(title)
+        #             soup = BeautifulSoup(match[1], "html.parser")
+        #             tags = soup.find_all('img')
+        #             if(tags is not None):
+        #                 for index, tag in enumerate(tags):
+        #                     self.__visitor.send_request("{host}/{path}".format(host=self.__host, path=tag['file'])).download(dir_path, 'sample-{index}.jpg'.format(index=index))
+        #                     time.sleep(1)
+        #             fo = open("{path}/pan.txt".format(path=dir_path), "w+")
+        #             fo.write(link)
+        #             fo.close()
+        #         break
 
 
-HKPic(Visitor(), Mysql()).run()
+HKPic().run()

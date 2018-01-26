@@ -1,4 +1,0 @@
-QLabel#pic-box{
-    border:1px solid red;
-    background:black;
-}

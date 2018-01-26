@@ -1,4 +1,4 @@
-import css from './Scss/Main.scss';
+import css from './Scss/Dialog.scss';
 import Component from '../../Components/Component';
 class Dialog extends Component {
 	constructor(props){

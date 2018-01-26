@@ -6,12 +6,18 @@
         display:inline-block;
         margin-right:50px;
         margin-top:20%;
-        cursor: pointer
+        cursor: pointer;
+        line-height: 200px;
+        color: #fff;
+        font-size: 140px;
     }
 }
-.blue{
-    background: blue;
+.av{
+    background: #fd3b3b;
 }
-.red{
-    background: red;
+.live{
+    background: #4141ff;
+}
+.setting{
+    background: #15b715;
 }

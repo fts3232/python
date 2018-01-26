@@ -1,4 +1,4 @@
-import css from './Scss/Main.scss';
+import css from './Scss/Header.scss';
 import Component from '../../Components/Component';
 class Header extends Component {
   	constructor(props){

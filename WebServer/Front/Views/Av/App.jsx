@@ -1,10 +1,10 @@
 import css from './Scss/Main.scss';
-import Dialog from '../Dialog';
-import Header from '../Header';
-import Log from '../Log';
-import Tag from '../Tag';
+import Dialog from './Dialog.jsx';
+import Header from './Header.jsx';
+import Log from './Log.jsx';
+import Tag from './Tag.jsx';
 import Component from '../../Components/Component';
-class List extends Component {
+class App extends Component {
 	constructor(props){
 		super(props);
         this.state = {
@@ -205,17 +205,17 @@ class List extends Component {
     }
 }
 
-List.childContextTypes = {
+App.childContextTypes = {
     component: React.PropTypes.any
 };
 
-List.PropTypes = {
+App.PropTypes = {
     space:React.PropTypes.number
 }
 
-List.defaultProps = {
+App.defaultProps = {
     space:10
 }
 
 //导出组件
-export default List;
+export default App;

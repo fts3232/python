@@ -1,0 +1,12 @@
+# Netscape HTTP Cookie File
+# http://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file!  Do not edit.
+
+198.15.119.148	FALSE	/	FALSE	1517043227	Ovo6_2132_lastact	1516956813%09forum.php%09forumdisplay
+198.15.119.148	FALSE	/	FALSE	1519548826	Ovo6_2132_lastvisit	1516953213
+198.15.119.148	FALSE	/	FALSE	1519548826	Ovo6_2132_saltkey	ok6Z8Z1b
+198.15.119.148	FALSE	/	FALSE		PHPSESSID	rlofciuc8vu6ov7uupkcu43262
+198.24.143.234	FALSE	/	FALSE	1517043588	Ovo6_2132_lastact	1516957155%09forum.php%09forumdisplay
+198.24.143.234	FALSE	/	FALSE	1519549188	Ovo6_2132_lastvisit	1516953554
+198.24.143.234	FALSE	/	FALSE	1519549188	Ovo6_2132_saltkey	n6dZdf8P
+198.24.143.234	FALSE	/	FALSE		PHPSESSID	hl3hljb6p96tdttffqq1m8e7q2

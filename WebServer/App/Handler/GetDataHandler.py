@@ -2,7 +2,7 @@ import os
 import tornado.web
 import sys
 sys.path.append("../")
-from Common.functions import findMovie
+from Helpers.functions import findMovie
 from Model.Movie import Movie
 from Model.Tag import Tag
 from Model.Star import Star
@@ -43,7 +43,8 @@ class GetDataHandler(tornado.web.RequestHandler):
         ret = self.__movie_model.get(options)
         for x in ret:
             # 可否播放
-            path = os.path.join('../JavBus/Movie', x['IDENTIFIER'])
+            storage_path = os.path.join(os.getcwd(), 'Storage/JavBus/Movie')
+            path = os.path.join(storage_path, x['IDENTIFIER'])
             x['PLAY'] = True if(findMovie(['E:\迅雷下载', 'D:\QQDownload', 'D:\Downloads'], x['IDENTIFIER'], ['.avi', '.mp4']) is not None) else False
             # 发布时间
             x['PUBLISH_TIME'] = x['PUBLISH_TIME'].strftime('%Y-%m-%d')

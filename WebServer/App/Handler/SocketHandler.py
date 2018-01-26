@@ -6,9 +6,8 @@ import subprocess
 import threading
 import sys
 sys.path.append("../")
-sys.path.append("../../")
-from Common.functions import findMovie
-from JavBus import JavBus
+from Helpers.functions import findMovie
+from Business.JavBus import JavBus
 
 
 class SocketHandler(WebSocketHandler):
