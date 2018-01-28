@@ -186,6 +186,9 @@ class App extends Component {
                                         {val.PLAY?(
                                             <span className="can-play">可播放</span>
                                         ):null}
+                                        {val.LINK.length > 0?(
+                                            <span className="can-download">可下载</span>
+                                        ):null}
                                     </div>
                                      <div className="info">
                                         <span className="identifier">{val.IDENTIFIER}</span>

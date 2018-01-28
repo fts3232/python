@@ -47,6 +47,17 @@ body{
 					    font-size: 12px;
 					    padding:1px 5px;
 				        opacity: .65;
+				        margin-right: 10px;
+					}
+					& .can-download{
+    					display: inline-block;
+					    background: #2030ff;
+					    border-radius:3px;
+    					line-height: 1.5;
+					    color:#fff;
+					    font-size: 12px;
+					    padding:1px 5px;
+				        opacity: .65;
 					}
     			}
     			& .info{
