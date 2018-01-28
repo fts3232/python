@@ -39,7 +39,8 @@ class Live():
             'http://www.huya.com/a16789',
         ],
         'panda': [
-            'https://www.panda.tv/73570'
+            'https://www.panda.tv/73570',
+            'https://www.panda.tv/172818'
         ],
         'longzhu': [
             'http://star.longzhu.com/777777'
