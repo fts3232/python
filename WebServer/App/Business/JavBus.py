@@ -36,7 +36,6 @@ class JavBus():
         self.check_table()
         if(os.path.exists(self.__path) is False):
             os.mkdir(self.__path)
-        print(self.__storage_path)
         self.get_host()
 
     # 创建数据表

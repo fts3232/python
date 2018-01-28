@@ -1,5 +1,6 @@
 import tornado.web
 import pickle
+import os
 
 
 class GetLiveHandler(tornado.web.RequestHandler):
@@ -10,8 +11,11 @@ class GetLiveHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
     def get(self):
-        fo = open('../host.pkl', 'rb+')
+        path = os.path.join(os.getcwd(), 'Storage/live.pkl')
+        fo = open(path, 'rb+')
         ret = fo.read()
         live_list = pickle.loads(ret)
+        for x in live_list:
+            live_list[x] = sorted(live_list[x].items(), key=lambda item: item[1]['state'], reverse=True)
         respon_json = tornado.escape.json_encode(live_list)
         self.write(respon_json)

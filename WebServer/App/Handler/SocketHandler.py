@@ -19,7 +19,7 @@ class SocketHandler(WebSocketHandler):
     users = set()  # 用来存放在线用户的容器
 
     def open(self):
-        print(self)
+        pass
         # self.users.add(self)  # 建立连接后添加用户到容器中
         # for u in self.users:  # 向已在线用户发送消息
         #     u.write_message(u"[%s]-[%s]-进入聊天室" % (self.request.remote_ip, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))

@@ -61,12 +61,13 @@ class Visitor:
 
     def __init__(self, stdout=print):
         # 设置保存cookie的文件，同级目录下的cookie.txt
-        filename = 'cookie.txt'
+        #filename = 'cookie.txt'
         # 声明一个MozillaCookieJar对象实例来保存cookie，之后写入文件
         # 使用cookie
-        self.__cookiejar = http.cookiejar.MozillaCookieJar(filename)
-        if(os.path.isfile(filename)):
-            self.__cookiejar.load(filename, ignore_discard=True, ignore_expires=True)
+        self.__cookiejar = http.cookiejar.CookieJar()
+        # self.__cookiejar = http.cookiejar.MozillaCookieJar(filename)
+        # if(os.path.isfile(filename)):
+        #     self.__cookiejar.load(filename, ignore_discard=True, ignore_expires=True)
         self.__urlOpener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(self.__cookiejar))
         self.__stdout = stdout
 
@@ -107,7 +108,7 @@ class Visitor:
                 data = bytes(urllib.parse.urlencode(data), encoding='utf8')
             request = urllib.request.Request(url, data=data, headers=self.get_headers(options))
             response = self.__urlOpener.open(request)
-            self.__cookiejar.save(ignore_discard=True, ignore_expires=True)
+            #self.__cookiejar.save(ignore_discard=True, ignore_expires=True)
             result = response.read()
             response.close()
             self.__stdout("发送请求 {url} 成功，发送次数：{num}".format(url=url, num=self.__total_request_num))

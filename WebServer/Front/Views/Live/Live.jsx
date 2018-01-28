@@ -45,16 +45,17 @@ class Live extends Component {
         for(let i in data){
             let items = []
             for(let j in data[i]){
+                let room_info = data[i][j][1]
                 items.push(
                     <div className="item">
-                        <a href={j} target="_blank">
-                            <img src={data[i][j].screenshot}/>
-                            <span className={this.classNames('state',{'off':!data[i][j].state})}>{data[i][j].state?'正在直播':'已下播'}</span>
+                        <a href={data[i][j][0]} target="_blank">
+                            <img src={room_info.screenshot}/>
+                            <span className={this.classNames('state',{'off':!room_info.state})}>{room_info.state?'正在直播':'已下播'}</span>
                             <div className="msg">
-                                <p><span className="title">{data[i][j].room_name}</span></p>
+                                <p><span className="title">{room_info.room_name}</span></p>
                                 <p>
-                                    <span className="nickname">{data[i][j].nickname}</span>
-                                    <span className="category">{data[i][j].category}</span>
+                                    <span className="nickname">{room_info.nickname}</span>
+                                    <span className="category">{room_info.category}</span>
                                 </p>
                             </div>
                         </a>
@@ -71,7 +72,7 @@ class Live extends Component {
             )
         }
         return (
-            <div ref="app" className="list-page">
+            <div ref="app" className="live-list-page">
                 {group}
             </div>
         )
