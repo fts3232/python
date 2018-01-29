@@ -12,7 +12,7 @@ from Lib.Jobs import Jobs
 from Config.DB import config
 
 
-# Jobs().run()
+Jobs().run()
 
 pool = ConnectionPool(config)
 
