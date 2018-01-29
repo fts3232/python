@@ -6,12 +6,13 @@ from Handler.GetDataHandler import GetDataHandler
 from Handler.GetTagHandler import GetTagHandler
 from Handler.SocketHandler import SocketHandler
 from Handler.GetLiveHandler import GetLiveHandler
+from Handler.GetComicHandler import GetComicHandler
 from Lib.Mysql import ConnectionPool
 from Lib.Jobs import Jobs
 from Config.DB import config
 
 
-Jobs().run()
+# Jobs().run()
 
 pool = ConnectionPool(config)
 
@@ -29,6 +30,7 @@ application = tornado.web.Application([
     (r"/getTag", GetTagHandler, dict(pool=pool)),
     (r"/socket", SocketHandler, dict(pool=pool)),
     (r"/getLive", GetLiveHandler),
+    (r"/getComic", GetComicHandler),
     (r"/(.*?)", tornado.web.StaticFileHandler, dict(path='Build', default_filename="index.html")),
     # (r"/css/(.*)", tornado.web.StaticFileHandler, dict(path='Build/css')),
     # (r"/js/(.*)", tornado.web.StaticFileHandler, dict(path='Build/js')),

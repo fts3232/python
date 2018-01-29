@@ -7,15 +7,12 @@ import pickle
 import sys
 from datetime import datetime
 sys.path.append("../")
+from Config.JavBus import config
 from Lib.Visitor import Visitor
 
 
 class JavBus():
     'JavBus'
-    # 发布页url
-    __publish_page = 'https://announce.javbus2.pw/website.php'
-    # 获取magnet的请求路径
-    __get_magnet_path = '/ajax/uncledatoolsbyajax.php'
     # 访问的域名
     __host = None
     # vistor类
@@ -142,7 +139,7 @@ class JavBus():
             if(ret['alive'] is not True):
                 raise Exception('旧有记录ping不通')
         except Exception as e:
-            body = self.__visitor.send_request(self.__publish_page).visit()
+            body = self.__visitor.send_request(config['publish_page']).visit()
             soup = BeautifulSoup(body, "html.parser")
             tags = soup.find_all('a')
             urls_list = []
@@ -265,7 +262,7 @@ class JavBus():
 
     # 获取magnet链接
     def get_magnet_link(self, conn, movie_id, body, referer, dir_path):
-        url = self.__host + self.__get_magnet_path
+        url = "{host}{path}".format(host=self.__host, path=config['get_magnet_path'])
         gid = re.search('var gid = (.*?);', body).group(1)
         img = re.search("var img = '(.*?)';", body).group(1)
         url = url + "?gid={gid}&img={img}&uc=0&lang=zh".format(gid=gid, img=img)

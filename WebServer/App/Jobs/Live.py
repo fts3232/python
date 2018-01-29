@@ -5,51 +5,12 @@ import pickle
 from urllib.parse import urlparse
 import sys
 sys.path.append("../")
+from Config.Live import config
 from Lib.Visitor import Visitor
 
 
 class Live():
     'live'
-    __rooms = {
-        'douyu': [
-            'https://www.douyu.com/aleng1106',
-            'https://www.douyu.com/196',
-            'https://www.douyu.com/asmr',
-            'https://www.douyu.com/tao15',
-            'https://www.douyu.com/xiaojiujiu',
-            'https://www.douyu.com/109064',
-            'https://www.douyu.com/220149',
-            'https://www.douyu.com/3107374',
-            'https://www.douyu.com/2168715',
-            'https://www.douyu.com/feimagine',
-            'https://www.douyu.com/184833',
-            'https://www.douyu.com/32892',
-            'https://www.douyu.com/78561',
-            'https://www.douyu.com/67373',
-            'https://www.douyu.com/292081',
-            'https://www.douyu.com/3507497',
-            'https://www.douyu.com/306774',
-            'https://www.douyu.com/213841',
-            'https://www.douyu.com/nvliu',
-            'https://www.douyu.com/jiao509',
-        ],
-        'huya': [
-            'http://www.huya.com/zhaoxiaochou',
-            'http://www.huya.com/2183499048',
-            'http://www.huya.com/a16789',
-        ],
-        'panda': [
-            'https://www.panda.tv/73570',
-            'https://www.panda.tv/172818'
-        ],
-        'longzhu': [
-            'http://star.longzhu.com/777777'
-        ]
-    }
-
-    __api = {
-        'douyu': 'http://open.douyucdn.cn/api/RoomApi/room',
-    }
     # vistor类
     __visitor = None
 
@@ -58,7 +19,7 @@ class Live():
 
     def douyu(self, room):
         parse = urlparse(room)
-        api = self.__api['douyu'] + parse.path
+        api = config['api']['douyu'] + parse.path
         body = self.__visitor.send_request(api).visit()
         if(body is not None):
             data = eval(body)
@@ -131,9 +92,9 @@ class Live():
                 ret = fo.read()
                 fo.close()
                 rooms = {}
-            for host in self.__rooms:
+            for host in config['rooms']:
                 rooms[host] = {}
-                for room in self.__rooms[host]:
+                for room in config['rooms'][host]:
                     if('douyu' == host):
                         ret = self.douyu(room)
                     elif('huya' == host):
@@ -149,7 +110,7 @@ class Live():
             fo.write(pickle.dumps(rooms))
             fo.close()
             print('结束...')
-            time.sleep(180)
+            time.sleep(config['interval'])
 
 
 Live().run()

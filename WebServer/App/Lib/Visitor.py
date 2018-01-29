@@ -6,6 +6,8 @@ import time
 import http.cookiejar
 import threading
 import os
+import gzip
+import zlib
 
 
 class VisitResult:
@@ -110,6 +112,11 @@ class Visitor:
             response = self.__urlOpener.open(request)
             #self.__cookiejar.save(ignore_discard=True, ignore_expires=True)
             result = response.read()
+            encoding = response.info().get('Content-Encoding')
+            if(encoding == 'gzip'):
+                result = gzip.decompress(result)
+            elif(encoding == 'deflate'):
+                result = zlib.decompress(data)
             response.close()
             self.__stdout("发送请求 {url} 成功，发送次数：{num}".format(url=url, num=self.__total_request_num))
             self.__total_request_num = 1
