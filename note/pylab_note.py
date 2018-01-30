@@ -72,3 +72,16 @@ font = FontProperties(fname=r"c:\windows\fonts\SimSun.ttc", size=14)
 # 			skipped += 1
 # 	averageim /= len(filelist) - skipped
 # 	return array(averageim,'uint8')
+#
+# img = array(Image.open(xxx))
+# x,y,color = img.shape()
+# 一维系x，二维系y，三维是颜色通过
+# 左右翻转
+#   img[:,-1::-1] 二维y轴翻转
+#
+# 上下翻转
+#   img[-1::-1] 一维y轴翻转
+#
+# 颜色翻转
+#   img[...,-1::-1] 三维颜色通过翻转
+#   ...代表省略前面的：冒号，1个冒号代表1个维度

@@ -24,11 +24,12 @@ for i, d in enumerate(dets):
     shape = predictor(img, d)
     for i in range(68):
         pt = shape.part(i)
-        plot(pt.x, pt.y, 'r.')
-    # cropped_img = open_img.crop((d.left(), d.top(), d.right(), d.bottom()))
-    # cropped_img = cropped_img.resize((96, 96))
+        # plot(pt.x, pt.y, 'r.')
+    cropped_img = open_img.crop((d.left(), d.top(), d.right(), d.bottom()))
+    cropped_img = cropped_img.resize((96, 96)).save('./t-thumb.jpg', 'JPEG', quality=100, optimize=True)
     # cv2.rectangle(img, (d.left(), d.top()), (d.right(), d.bottom()), (55, 255, 155), 2)
 
 # ...省略所有的冒号来用省略号,-1代表最后一个维度 ::-1 翻转
-imshow(img[..., -1::-1])
+# imshow(img[..., -1::-1])
+imshow(cropped_img)
 show()
