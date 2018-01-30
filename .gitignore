@@ -60,3 +60,5 @@ Storage/
 shape_predictor_68_face_landmarks.dat
 dlib-19.7.0-cp36-cp36m-win_amd64.whl
 chainer-3.3.0
+faces/
+Star/

@@ -20,7 +20,7 @@ class DM5():
         data = eval(ret)
         comic_list = []
         for x in data['UpdateComicItems']:
-            comic_list.append({'url': "{host}/{path}".format(host=config['host'], path=x['LastPartUrl']), 'title': x['Title'], 'episodes': x['ShowLastPartName'], 'cover': x['ShowConver']})
+            comic_list.append({'url': "{host}/{path}".format(host=config['host'], path=x['LastPartUrl']), 'title': x['Title'], 'episodes': x['ShowLastPartName'], 'cover': x['ShowPicUrlB']})
             # print("标题：{title} 集数：{partname} 封面：{cover}".format(title=x['Title'], partname=x['ShowLastPartName'], cover=x['ShowConver']))
         return comic_list
 

@@ -4,52 +4,47 @@ a{
     color: inherit;
 }
 .comic-list-page{
-	width:1430px;
+	width:1229px;
 	margin:50px auto;
 	& .item{
-		width: 350px;
+		width: 167px;
 		position: relative;
 		float: left;
 		margin-right: 10px;
 		margin-bottom: 10px;
 		cursor: pointer;
 		text-align:center;
-	    background: #000;
-		&:nth-child(4n){
+	    background: #fff;
+		&:nth-child(7n){
 			margin-right:0;
 		}
-		& img{
-			max-height: 196px;
-			max-width: 100%;
-		    vertical-align: middle;
+		& .cover{
+		    width: 100%;
+		    height:200px;
+		    background-size: cover;
 		}
-		& .state{
-			position: absolute;
-		    top: 10px;
-		    left: 0;
-		    color: #fff;
-		    font-size: 12px;
-		    background: #62B21B;
-		    border-radius: 0 13px 13px 0;
-		    padding: 0 5px 0 27px;
-		    &.off{
-		    	background:#40adff;
+		& .info-box{
+			text-align:left;
+			padding:10px;
+		    & .title{
+		    	color: #252525;
+	    	    font-size: 14px;
+			    font-weight: 700;
+			    margin-top: 8px;
+			    margin-bottom: 8px;
+			    white-space: nowrap;
+			    overflow: hidden;
+			    text-overflow: ellipsis;
 		    }
-		}
-		& .msg{
-			background: #fff;
-		    padding: 5px 5px 3px;
-		    line-height: 20px;
-		    font-size: 12px;
-		    height: 48px;
-		    overflow: hidden;
-		    text-align:left;
-		    & .nickname{
-		    	color:#797979;
-		    }
-		    & .category{
-	    	    float: right;
-    			color: #f60;
+		    & .episodes{
+		    	color: #fd113a;
+	    	    font-size: 12px;
+    			line-height: 18px;
+		        white-space: nowrap;
+			    overflow: hidden;
+			    text-overflow: ellipsis;
+		        display: inline-block;
+    			width: 100%;
 		    }
 		}
 	}

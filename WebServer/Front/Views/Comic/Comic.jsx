@@ -40,9 +40,9 @@ class Comic extends Component {
                     return (
                         <div className="item">
                             <a href={v.url}>
-                                <img src={v.cover}/>
+                                <div className="cover" style={{'background':'url('+v.cover+')'}}></div>
                                 <div className="info-box">
-                                    <span className="title">{v.title}</span>
+                                    <h2 className="title">{v.title}</h2>
                                     <span className="episodes">{v.episodes}</span>
                                 </div>
                             </a>

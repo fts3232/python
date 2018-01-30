@@ -87,15 +87,17 @@
 	        }
         }
         & .star{
-    	    padding-bottom: 10px;
     		border-bottom: 1px solid #E1E1E1;
     		margin-top: 10px;
+		    height: 200px;
+    		overflow: auto;
         	& .star-item{
         		cursor: pointer;
         		display: inline-block;
     		    box-shadow: 0 1px 3px rgba(0,0,0,.3);
         		text-align: center;
         		margin-right: 10px;
+    		    margin-bottom: 10px;
         		& img{
         			display: block;
         		}
