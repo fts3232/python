@@ -18,6 +18,38 @@ class App extends Component {
             tag:false,
         }
 	}
+    getCanPlay(){
+        let _this = this;
+        this.setState({'title':false,'tag':false,'star':false,'data':[],'page':1,'end':false,rows_height:[]},()=>{
+            new Promise((resolve,reject)=>{
+                let url = 'http://localhost:8000/getCanPlay'
+                request.get(url)
+                       .end(function(err, res){
+                            if(res.ok){
+                                resolve(JSON.parse(res.text))
+                            }else{
+                                reject(err)
+                            }
+                       })
+            }).then((data)=>{
+                if(data!=''){
+                    _this.setState({'data':data},()=>{
+                        let _this = this
+                        let length = $('.waterfall .item:not(.active) img').length
+                        let i = 0
+                        $('.waterfall .item:not(.active) img').on('load error',function(){
+                            i += 1
+                            if(i==length){
+                                let items = $(_this.refs.waterfall).find('.item:not(.active)')
+                               _this.waterfall(items)
+                            }
+                        })
+                    })
+                    _this.setState({'end':true,'getData':false})
+                }
+            })
+        })
+    }
     getData(){
         let _this = this;
         let page = _this.state.page

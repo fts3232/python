@@ -22,6 +22,9 @@ class Header extends Component {
       this.parent().refs.log.setState({'toggle':true});
       this.parent().socketSend('spider');
     }
+    getCanPlay(){
+      this.parent().getCanPlay();
+    }
     render() {
         return (
             <div className="header">
@@ -29,6 +32,7 @@ class Header extends Component {
                 <button onClick={this.search.bind(this)}>搜索</button>
                 <button onClick={this.scan.bind(this)}>扫描</button>
                 <button onClick={this.spider.bind(this)}>爬取</button>
+                <button onClick={this.getCanPlay.bind(this)}>可播放</button>
             </div>
         )
     }

@@ -6,13 +6,6 @@ from PIL import Image
 import dlib
 import cv2
 import glob
-import chainer
-import chainer.functions as F
-import chainer.links as L
-from chainer import optimizers
-from chainer import iterators
-from chainer import training
-from chainer import Variable
 import time
 
 
@@ -22,6 +15,38 @@ images = []
 labels = []
 
 detector = dlib.get_frontal_face_detector()
+
+
+# 按照指定图像大小调整尺寸
+def resize_image(image, height=IMAGE_SIZE, width=IMAGE_SIZE):
+    top, bottom, left, right = (0, 0, 0, 0)
+
+    # 获取图像尺寸
+    h, w, _ = image.shape
+
+    # 对于长宽不相等的图片，找到最长的一边
+    longest_edge = max(h, w)
+
+    # 计算短边需要增加多上像素宽度使其与长边等长
+    if h < longest_edge:
+        dh = longest_edge - h
+        top = dh // 2
+        bottom = dh - top
+    elif w < longest_edge:
+        dw = longest_edge - w
+        left = dw // 2
+        right = dw - left
+    else:
+        pass
+
+    # RGB颜色
+    BLACK = [0, 0, 0]
+
+    # 给图像增加边界，是图片长、宽等长，cv2.BORDER_CONSTANT指定边界颜色由value指定
+    constant = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=BLACK)
+
+    # 调整图像大小并返回
+    return cv2.resize(constant, (height, width))
 
 
 def read_path(path_name):
@@ -45,9 +70,9 @@ def read_path(path_name):
                         offset_x = int((96 - w) / 2)
                         offset_y = int((96 - h) / 2)
                         p.paste(cropped_img, (offset_x, offset_y, w + offset_x, h + offset_y))
-                        if(os.path.exists(os.path.join('./faces', os.path.basename(path_name))) is False):
-                            os.mkdir(os.path.join('./faces', os.path.basename(path_name)))
-                        p.save('./faces/{dirname}/{name}.jpg'.format(name=filename[0], dirname=os.path.basename(path_name)), 'JPEG', quality=100, optimize=True)
+                        if(os.path.exists(os.path.join('../faces', os.path.basename(path_name))) is False):
+                            os.mkdir(os.path.join('../faces', os.path.basename(path_name)))
+                        p.save('../faces/{dirname}/{name}.jpg'.format(name=filename[0], dirname=os.path.basename(path_name)), 'JPEG', quality=100, optimize=True)
 
                     images.append(np.array(open_img))
                     labels.append(os.path.basename(path_name))
@@ -101,7 +126,7 @@ def save_dataset_numpy(data_list, image_path, label_path):
     np.save(label_path, label_data)
 
 
-# prepare_dataset('./Star')
+# prepare_dataset('../Star')
 # image, label = load_dataset('./faces')
 # save_dataset_numpy(train_list, './train/data.npy', './train/label.npy')
 # save_dataset_numpy(test_list, './test/data.npy', './test/label.npy')

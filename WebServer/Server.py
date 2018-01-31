@@ -3,6 +3,7 @@ import tornado.web
 import sys
 sys.path.append("./App")
 from Handler.GetDataHandler import GetDataHandler
+from Handler.GetCanPlayHandler import GetCanPlayHandler
 from Handler.GetTagHandler import GetTagHandler
 from Handler.SocketHandler import SocketHandler
 from Handler.GetLiveHandler import GetLiveHandler
@@ -27,6 +28,7 @@ settings = {
 
 application = tornado.web.Application([
     (r"/getData", GetDataHandler, dict(pool=pool)),
+    (r"/getCanPlay", GetCanPlayHandler, dict(pool=pool)),
     (r"/getTag", GetTagHandler, dict(pool=pool)),
     (r"/socket", SocketHandler, dict(pool=pool)),
     (r"/getLive", GetLiveHandler),

@@ -21,3 +21,8 @@ class Movie():
             where = 'where ' + where
         sql = 'select MOVIE_ID,TITLE,IDENTIFIER,TAG,STAR,PUBLISH_TIME from MOVIE {where} ORDER BY UPDATED_TIME DESC,PUBLISH_TIME DESC,CREATED_TIME DESC LIMIT {offset},{size}'.format(offset=options['offset'], size=options['size'], where=where)
         return self.__db.select(sql, whereData)
+
+    def getCanplay(self, identifiers):
+        where = "WHERE IDENTIFIER IN({})".format(','.join(identifiers))
+        sql = 'select MOVIE_ID,TITLE,IDENTIFIER,TAG,STAR,PUBLISH_TIME from MOVIE {where} ORDER BY UPDATED_TIME DESC,PUBLISH_TIME DESC,CREATED_TIME DESC'.format(where=where)
+        return self.__db.select(sql)

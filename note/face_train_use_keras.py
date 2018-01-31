@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 import random
 import numpy as np
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -11,7 +11,8 @@ from keras.optimizers import SGD
 from keras.utils import np_utils
 from keras.models import load_model
 from keras import backend as K
-from load_face_dataset import load_dataset, IMAGE_SIZE
+from load_face_dataset import load_dataset, resize_image, IMAGE_SIZE
+from PIL import Image
 
 
 MODEL_PATH = './me.face.model.h5'
@@ -180,15 +181,48 @@ class Model:
         score = self.model.evaluate(dataset.test_images, dataset.test_labels, verbose=1)
         print("%s: %.2f%%" % (self.model.metrics_names[1], score[1] * 100))
 
+    # 识别人脸
+    def face_predict(self, image):
+        # 依然是根据后端系统确定维度顺序
+        if K.image_dim_ordering() == 'th' and image.shape != (1, 3, IMAGE_SIZE, IMAGE_SIZE):
+            image = resize_image(image)  # 尺寸必须与训练集一致都应该是IMAGE_SIZE x IMAGE_SIZE
+            image = image.reshape((1, 3, IMAGE_SIZE, IMAGE_SIZE))  # 与模型训练不同，这次只是针对1张图片进行预测
+        elif K.image_dim_ordering() == 'tf':
+            # image = resize_image(image)
+            image.thumbnail((96, 96), Image.ANTIALIAS)
+            image = np.array(image)
+            image = image.reshape((1, IMAGE_SIZE, IMAGE_SIZE, 3))
 
-dataset = Dataset('./faces')
+        # 浮点并归一化
+        image = image.astype('float32')
+        image /= 255
+
+        # 给出输入属于各个类别的概率，我们是二值类别，则该函数会给出输入图像属于0和1的概率各为多少
+        result = self.model.predict_proba(image)
+        print('result:', result)
+
+        # 给出类别预测：0或者1
+        result = self.model.predict_classes(image)
+
+        # 返回类别预测结果
+        return result[0]
+
+
+dataset = Dataset('../faces')
 dataset.load()
 # 训练模型
-model = Model()
-model.build_model(dataset)
-model.train(dataset, 10, 1, False)
-model.save_model('./model/me.face.model.h5')
+# model = Model()
+# model.build_model(dataset)
+# model.train(dataset)
+# model.save_model('./me.face.model.h5')
 # 评估模型
 # model = Model()
-# model.load_model('./model/me.face.model.h5')
+# model.load_model('./me.face.model.h5')
 # model.evaluate(dataset)
+# 模型预测
+model = Model()
+model.load_model('./me.face.model.h5')
+# img = Image.open('../WebServer/Storage/JavBus/Star/AIKA.jpg')
+img = Image.open('../faces/松井玲奈/79f0f736afc379317442c250e1c4b74543a911a4.jpg')
+faceID = model.face_predict(img)
+print(faceID)
