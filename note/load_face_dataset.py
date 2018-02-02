@@ -7,9 +7,10 @@ import dlib
 import cv2
 import glob
 import time
+from keras.utils import np_utils
 
 
-IMAGE_SIZE = 96
+IMAGE_SIZE = 64
 # 读取训练数据
 images = []
 labels = []
@@ -64,11 +65,11 @@ def read_path(path_name):
                     filename = os.path.splitext(dir_item)
                     for i, d in enumerate(dets):
                         cropped_img = open_img.crop((d.left(), d.top(), d.right(), d.bottom()))
-                        cropped_img.thumbnail((96, 96), Image.ANTIALIAS)
+                        cropped_img.thumbnail((IMAGE_SIZE, IMAGE_SIZE), Image.ANTIALIAS)
                         w, h = cropped_img.size
-                        p = Image.new('RGB', (96, 96), (0, 0, 0))
-                        offset_x = int((96 - w) / 2)
-                        offset_y = int((96 - h) / 2)
+                        p = Image.new('RGB', (IMAGE_SIZE, IMAGE_SIZE), (0, 0, 0))
+                        offset_x = int((IMAGE_SIZE - w) / 2)
+                        offset_y = int((IMAGE_SIZE - h) / 2)
                         p.paste(cropped_img, (offset_x, offset_y, w + offset_x, h + offset_y))
                         if(os.path.exists(os.path.join('../faces', os.path.basename(path_name))) is False):
                             os.mkdir(os.path.join('../faces', os.path.basename(path_name)))
@@ -86,11 +87,11 @@ def prepare_dataset(path_name):
     # 将输入的所有图片转成四维数组，尺寸为(图片数量*IMAGE_SIZE*IMAGE_SIZE*3)
     # 我和闺女两个人共1200张图片，IMAGE_SIZE为64，故对我来说尺寸为1200 * 64 * 64 * 3
     # 图片为64 * 64像素,一个像素3个颜色值(RGB)
-    images = np.array(images)
+    # images = np.array(images)
     # print(images.shape)
 
     # # 标注数据，'me'文件夹下都是我的脸部图像，全部指定为0，另外一个文件夹下是闺女的，全部指定为1
-    labels = np.array(labels)
+    # labels = np.array(labels)
 
     return images, labels
 
@@ -106,11 +107,22 @@ def load_dataset(path_name):
             image = np.array(Image.open(file_name))
             label = dir_index
             image_list.append(image)
+            if(dir_name == '松井玲奈'):
+                label = 0
+            elif(dir_name == '松井珠理奈'):
+                label = 1
+            else:
+                continue
             label_list.append(label)
             image_list_count += 1
         print("directory:{} total:{}".format(dir_name, image_list_count))
-    image = np.array(image_list, dtype=np.float32)
-    label = np.array(label_list, dtype=np.int32)
+
+    image = np.array(image_list)
+    # image = image.reshape(image.shape[0], 3, 64, 64)
+    image = image.astype('float32')
+    image /= 255
+    label = np.array(label_list)
+    label = np_utils.to_categorical(label, 2)
     return image, label
 
 
@@ -127,6 +139,6 @@ def save_dataset_numpy(data_list, image_path, label_path):
 
 
 # prepare_dataset('../Star')
-# image, label = load_dataset('./faces')
+# image, label = load_dataset('../faces')
 # save_dataset_numpy(train_list, './train/data.npy', './train/label.npy')
 # save_dataset_numpy(test_list, './test/data.npy', './test/label.npy')
