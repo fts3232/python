@@ -34,10 +34,10 @@ Y = dataset[:, 8]  # 输出
 # model.save('./pima-indians-diabetes.h5')
 model = load_model('./pima-indians-diabetes.h5')
 # evaluate the model
-# scores = model.evaluate(X, Y)
-# print("%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
+scores = model.evaluate(X, Y)
+print("%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
 # calculate predictions
 predictions = model.predict(X)
 # round predictions
-for i, x in enumerate(predictions):
-    print(round(x[0]))
+# for i, x in enumerate(predictions):
+#     print(round(x[0]))

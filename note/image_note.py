@@ -47,10 +47,6 @@ images, labels = load_dataset('../faces2')
 X = images
 predictions = model.predict_classes(X)
 proba = model.predict_proba(X)
-print(proba)
 # round predictions
 for i, x in enumerate(predictions):
-    if(proba[i][x] > 0.5):
-        print(x)
-    else:
-        print('none')
+    print(int(proba[i][x] * 100))
