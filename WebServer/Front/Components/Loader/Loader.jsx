@@ -1,6 +1,8 @@
 //Component1.jsx
 /*import React from 'react';*/
 import Component from '../Component';
+import css from './Scss/Main.scss';
+const Link = ReactRouterDOM.Link
 class Loader extends Component {
 	constructor(props){
 		super(props);
@@ -36,6 +38,7 @@ class Loader extends Component {
     render() {
         return (
             <div className="Loader">
+                <button className="back-home"><Link to="/">返回</Link></button>
                 {this.state.Component}
             </div>
         )

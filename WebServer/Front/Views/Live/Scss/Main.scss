@@ -4,7 +4,7 @@ a{
     color: inherit;
 }
 .live-list-page{
-	width:1430px;
+	width:100%;
 	margin:50px auto;
 	& .item-group{
 		overflow: hidden;
@@ -14,8 +14,7 @@ a{
 		& .items{
 			& .item{
 				width: 350px;
-				position: relative;
-				float: left;
+				display: inline-block;
 				margin-right: 10px;
 				margin-bottom: 10px;
 				cursor: pointer;

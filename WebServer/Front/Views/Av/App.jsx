@@ -16,40 +16,9 @@ class App extends Component {
             getData:false,
             star:false,
             tag:false,
+            canPlay:false,
         }
 	}
-    getCanPlay(){
-        let _this = this;
-        this.setState({'title':false,'tag':false,'star':false,'data':[],'page':1,'end':false,rows_height:[]},()=>{
-            new Promise((resolve,reject)=>{
-                let url = 'http://localhost:8000/getCanPlay'
-                request.get(url)
-                       .end(function(err, res){
-                            if(res.ok){
-                                resolve(JSON.parse(res.text))
-                            }else{
-                                reject(err)
-                            }
-                       })
-            }).then((data)=>{
-                if(data!=''){
-                    _this.setState({'data':data},()=>{
-                        let _this = this
-                        let length = $('.waterfall .item:not(.active) img').length
-                        let i = 0
-                        $('.waterfall .item:not(.active) img').on('load error',function(){
-                            i += 1
-                            if(i==length){
-                                let items = $(_this.refs.waterfall).find('.item:not(.active)')
-                               _this.waterfall(items)
-                            }
-                        })
-                    })
-                    _this.setState({'end':true,'getData':false})
-                }
-            })
-        })
-    }
     getData(){
         let _this = this;
         let page = _this.state.page
@@ -57,15 +26,18 @@ class App extends Component {
             this.setState({'getData':true},()=>{
                 new Promise((resolve,reject)=>{
                     let url = 'http://localhost:8000/getData?p='+page+'&size=24'
+                    if(_this.state.canPlay == true)
+                        url += '&canPlay=1'
                     if(_this.state.title != false)
                         url += '&title=' + _this.state.title
                     else if(_this.state.star != false)
                         url += '&star=' + _this.state.star
                     else if(_this.state.tag != false)
                         url += '&tag=' + _this.state.tag
+
                     request.get(url)
                            .end(function(err, res){
-                                if(res.ok){
+                                if(typeof res != 'undefined' && res.ok){
                                     resolve(JSON.parse(res.text))
                                 }else{
                                     reject(err)
@@ -90,6 +62,8 @@ class App extends Component {
                     }else{
                         _this.setState({'end':true,'getData':false})
                     }
+                }).catch((err)=>{
+                    _this.setState({'end':true,'getData':false})
                 })
             })
         }
@@ -97,25 +71,27 @@ class App extends Component {
     componentDidMount(){
         let _this = this
         let socket = new WebSocket('ws://localhost:8000/socket')
-        // 打开Socket 
-        socket.onopen = function(event) { 
-          console.log('连接成功')
-        }
-        // 监听消息
-        socket.onmessage = function(event) { 
-            let data = JSON.parse(event.data)
-            if(data.event=='scan' || data.event=='spider'){
-                _this.refs.log.appendData(data.msg)
-            }else if(data.event=='play' && data.msg=='打开失败'){
-                alert(data.msg)
+        if(socket.readyState == 1){
+            // 打开Socket 
+            socket.onopen = function(event) { 
+              console.log('连接成功')
             }
-        }; 
-        // 监听Socket的关闭
-        socket.onclose = function(event) { 
-          console.log('Client notified socket has closed',event); 
-          // 关闭Socket.... 
-          //socket.close() 
-        }; 
+            // 监听消息
+            socket.onmessage = function(event) { 
+                let data = JSON.parse(event.data)
+                if(data.event=='scan' || data.event=='spider'){
+                    _this.refs.log.appendData(data.msg)
+                }else if(data.event=='play' && data.msg=='打开失败'){
+                    alert(data.msg)
+                }
+            }; 
+            // 监听Socket的关闭
+            socket.onclose = function(event) { 
+              console.log('Client notified socket has closed',event); 
+              // 关闭Socket.... 
+              //socket.close() 
+            }; 
+        }
         this.socket = socket
         this.getData()
         $(window).resize(()=>{

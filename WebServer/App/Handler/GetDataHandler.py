@@ -8,6 +8,7 @@ from Model.Tag import Tag
 from Model.Star import Star
 from Model.DownloadLink import DownloadLink
 from Model.Sample import Sample
+import re
 
 
 class GetDataHandler(tornado.web.RequestHandler):
@@ -32,9 +33,42 @@ class GetDataHandler(tornado.web.RequestHandler):
         title = self.get_argument('title', default=None)
         star = self.get_argument('star', default=None)
         tag = self.get_argument('tag', default=None)
+        canPlay = True if self.get_argument('canPlay', default=0) == 1 else False
         offset = (int(p) - 1) * int(size)
         options = {'size': size, 'title': title, 'star': star, 'tag': tag, 'offset': offset}
+        if(canPlay is True):
+            identifiers = self.getCanPlay()
+            identifiers = identifiers[offset + size:size]
+            ret = self.__movie_model.get(options)
+            options['identifiers'] = ret
         ret = self.getData(options)
+        self.__db.release()
+        respon_json = tornado.escape.json_encode(ret)
+        self.write(respon_json)
+
+    def getCanPlay(self):
+        roots = ['E:\迅雷下载', 'D:\QQDownload', 'D:\Downloads']
+        identifiers = []
+        for root in roots:
+            for path in os.listdir(root):
+                temp = "{root}/{path}".format(root=root, path=path)
+                ret = os.path.splitext(temp)
+                if((os.path.isfile(temp) and ret[1].lower() in ['.avi', '.mp4']) or os.path.isdir(temp)):
+                    ret = re.findall('([A-Za-z]{2,})-?(\d{3,4})(-\d+)?', path)
+                    if(len(ret) > 0):
+                        ret = ret[-1]
+                        num = ret[1]
+                        if(len(num) >= 4 and num[0] == '0' and ret[0] != 'heyzo'):
+                            num = num[1:]
+                        if(ret[2] != ''):
+                            identifier = "{series}-{num}-{extra}".format(series=ret[0], num=num, extra=ret[2][1:])
+                        else:
+                            identifier = "{series}-{num}".format(series=ret[0], num=num)
+                        ret = re.findall('\d{6,}', path)
+                        if(len(ret) > 0):
+                            identifier = path
+                        identifiers.append("'{}'".format(identifier))
+        ret = self.getData(identifiers)
         self.__db.release()
         respon_json = tornado.escape.json_encode(ret)
         self.write(respon_json)

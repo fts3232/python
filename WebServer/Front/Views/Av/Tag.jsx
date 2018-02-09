@@ -20,7 +20,7 @@ class Tag extends Component {
         let url = 'http://localhost:8000/getTag'
         request.get(url)
                .end(function(err, res){
-                    if(res.ok){
+                    if(typeof res != 'undefined' && res.ok){
                         resolve(JSON.parse(res.text))
                     }else{
                         reject(err)
@@ -28,6 +28,8 @@ class Tag extends Component {
                })
     }).then((data)=>{
       _this.setState({'data':data})
+    }).catch((err)=>{
+      //console.log(err)
     })
   }
   itemClick(id){

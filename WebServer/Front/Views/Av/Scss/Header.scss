@@ -27,6 +27,15 @@
         &:last-child{
         	margin-right: 0;
         }
+        &.switch{
+            background-color: #dcdfe6;
+            border-color: #dcdfe6;
+            outline: none;
+            &.on{
+                background-color: #409eff;
+                border-color: #409eff;
+            }
+        }
 	}
 	& button:hover{
 	    color: #fff;

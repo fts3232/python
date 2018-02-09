@@ -3,7 +3,9 @@ import Component from '../../Components/Component';
 class Header extends Component {
   	constructor(props){
   		super(props);
-
+      this.state = {
+        'canPlay':false
+      }
   	}
     parent(){
         return this.context.component
@@ -23,7 +25,16 @@ class Header extends Component {
       this.parent().socketSend('spider');
     }
     getCanPlay(){
-      this.parent().getCanPlay();
+      if(this.parent().state.getData==false){
+        let _this = this
+        let status = !this.state.canPlay
+        this.setState({'canPlay':status},()=>{
+          _this.parent().setState({'canPlay':status,'data':[],'page':1,'end':false,rows_height:[]},()=>{
+            _this.parent().getData()
+          })
+        })
+      }
+      
     }
     render() {
         return (
@@ -32,7 +43,7 @@ class Header extends Component {
                 <button onClick={this.search.bind(this)}>搜索</button>
                 <button onClick={this.scan.bind(this)}>扫描</button>
                 <button onClick={this.spider.bind(this)}>爬取</button>
-                <button onClick={this.getCanPlay.bind(this)}>可播放</button>
+                <button className={this.classNames('switch',{'on':this.state.canPlay})} onClick={this.getCanPlay.bind(this)}>可播放</button>
             </div>
         )
     }
