@@ -62,3 +62,5 @@ dlib-19.7.0-cp36-cp36m-win_amd64.whl
 chainer-3.3.0
 faces/
 Star/
+*.h5
+faces2/
