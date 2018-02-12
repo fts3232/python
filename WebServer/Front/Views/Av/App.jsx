@@ -77,13 +77,15 @@ class App extends Component {
         let socket = new WebSocket('ws://localhost:8000/socket')
         // 打开Socket 
         socket.onopen = function(event) { 
-          console.log('连接成功')
+            console.log('连接成功')
             // 监听消息
             socket.onmessage = function(event) { 
                 let data = JSON.parse(event.data)
                 if(data.event=='scan' || data.event=='spider'){
                     _this.refs.log.appendData(data.msg)
-                }else if(data.event=='play' && data.msg=='打开失败'){
+                }else if(data.event=='play' && data.msg=='播放失败'){
+                    alert(data.msg)
+                }else if(data.event=='open-dir' && data.msg=='打开失败'){
                     alert(data.msg)
                 }
             }; 
@@ -91,9 +93,9 @@ class App extends Component {
        
         // 监听Socket的关闭
         socket.onclose = function(event) { 
-          console.log('Client notified socket has closed',event); 
-          // 关闭Socket.... 
-          //socket.close() 
+            console.log('Client notified socket has closed',event); 
+            // 关闭Socket.... 
+            //socket.close() 
         }; 
         this.socket = socket
         this.getData()

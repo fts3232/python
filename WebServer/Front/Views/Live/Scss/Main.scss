@@ -5,7 +5,7 @@ a{
 }
 .live-list-page{
 	width:100%;
-	margin:50px auto;
+	margin:80px auto;
 	& .item-group{
 		overflow: hidden;
 		& h3{
@@ -13,6 +13,7 @@ a{
 		}
 		& .items{
 			& .item{
+				position: relative;
 				width: 350px;
 				display: inline-block;
 				margin-right: 10px;

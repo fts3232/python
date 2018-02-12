@@ -4,9 +4,7 @@ import time
 import os
 import re
 import pickle
-import sys
 from datetime import datetime
-sys.path.append("../")
 from Config.JavBus import config
 from Lib.Visitor import Visitor
 

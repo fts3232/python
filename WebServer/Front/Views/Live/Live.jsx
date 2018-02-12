@@ -1,5 +1,6 @@
 import css from './Scss/Main.scss';
 import Component from '../../Components/Component';
+import Header from './Header';
 class Live extends Component {
 	constructor(props){
 		super(props);
@@ -7,31 +8,36 @@ class Live extends Component {
             'data':[]
         }
 	}
+    getData(){
+        let data = JSON.stringify({'event':'updateLive','msg':''})
+        this.socket.send(data)
+    }
+    componentDidMount(){
+        let socket = new WebSocket('ws://localhost:8000/socket')
+        let _this = this
+        // 打开Socket 
+        socket.onopen = function(event) { 
+            console.log('连接成功')
+            // 监听消息
+            socket.onmessage = function(event) { 
+                let data = JSON.parse(event.data)
+                if(data.event=='Live'){
+                    _this.setState({'data':data.msg})
+                }
+            }; 
+        }
+        // 监听Socket的关闭
+        socket.onclose = function(event) { 
+            console.log('Client notified socket has closed',event); 
+            // 关闭Socket.... 
+            //socket.close() 
+        }; 
+        this.socket = socket
+    }
     getChildContext(){
         return {
           component: this
         };
-    }
-    getData(){
-        let _this = this;
-        this.setState({'getData':true},()=>{
-            new Promise((resolve,reject)=>{
-                let url = 'http://localhost:8000/getLive'
-                request.get(url)
-                       .end(function(err, res){
-                            if(res.ok){
-                                resolve(JSON.parse(res.text))
-                            }else{
-                                reject(err)
-                            }
-                       })
-            }).then((data)=>{
-                _this.setState({'data':data})
-            })
-        })
-    }
-    componentDidMount(){
-        this.getData()
     }
     render() {
         let group = []
@@ -73,6 +79,7 @@ class Live extends Component {
         }
         return (
             <div ref="app" className="live-list-page">
+                <Header />
                 {group}
             </div>
         )

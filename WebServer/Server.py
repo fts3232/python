@@ -1,16 +1,17 @@
 import tornado.ioloop
 import tornado.web
 import sys
+import os
 sys.path.append("./App")
 from Handler.GetDataHandler import GetDataHandler
 from Handler.GetTagHandler import GetTagHandler
 from Handler.SocketHandler import SocketHandler
-from Handler.GetLiveHandler import GetLiveHandler
 from Handler.GetComicHandler import GetComicHandler
 from Lib.Mysql import ConnectionPool
-from Lib.Jobs import Jobs
+# from Lib.Jobs import Jobs
 from Config.DB import config
-
+import sys
+sys.path.append(os.path.join(os.getcwd(), 'App'))
 
 # Jobs().run()
 
@@ -29,7 +30,6 @@ application = tornado.web.Application([
     (r"/getData", GetDataHandler, dict(pool=pool)),
     (r"/getTag", GetTagHandler, dict(pool=pool)),
     (r"/socket", SocketHandler, dict(pool=pool)),
-    (r"/getLive", GetLiveHandler),
     (r"/getComic", GetComicHandler),
     (r"/(.*?)", tornado.web.StaticFileHandler, dict(path='Build', default_filename="index.html")),
     # (r"/css/(.*)", tornado.web.StaticFileHandler, dict(path='Build/css')),

@@ -19,7 +19,7 @@ class Comic extends Component {
                 let url = 'http://localhost:8000/getComic'
                 request.get(url)
                        .end(function(err, res){
-                            if(res.ok){
+                            if(typeof res !='undefined' && res.ok){
                                 resolve(JSON.parse(res.text))
                             }else{
                                 reject(err)
