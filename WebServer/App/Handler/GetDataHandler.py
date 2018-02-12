@@ -28,19 +28,19 @@ class GetDataHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
     def get(self):
-        p = self.get_argument('p', default=1)
-        size = self.get_argument('size', default=12)
+        p = int(self.get_argument('p', default=1))
+        size = int(self.get_argument('size', default=12))
         title = self.get_argument('title', default=None)
         star = self.get_argument('star', default=None)
         tag = self.get_argument('tag', default=None)
-        canPlay = True if self.get_argument('canPlay', default=0) == 1 else False
-        offset = (int(p) - 1) * int(size)
+        canPlay = True if self.get_argument('canPlay', default=0) == '1' else False
+        offset = (p - 1) * size
         options = {'size': size, 'title': title, 'star': star, 'tag': tag, 'offset': offset}
         if(canPlay is True):
             identifiers = self.getCanPlay()
-            identifiers = identifiers[offset + size:size]
-            ret = self.__movie_model.get(options)
-            options['identifiers'] = ret
+            if(options['title'] is None and options['star'] is None and options['tag'] is None):
+                identifiers = identifiers[offset:offset + size]
+            options['identifiers'] = identifiers
         ret = self.getData(options)
         self.__db.release()
         respon_json = tornado.escape.json_encode(ret)
@@ -50,7 +50,9 @@ class GetDataHandler(tornado.web.RequestHandler):
         roots = ['E:\迅雷下载', 'D:\QQDownload', 'D:\Downloads']
         identifiers = []
         for root in roots:
-            for path in os.listdir(root):
+            paths = os.listdir(root)
+            paths = sorted(paths, key=lambda x: os.path.getmtime(os.path.join(root, x)), reverse=True)
+            for path in paths:
                 temp = "{root}/{path}".format(root=root, path=path)
                 ret = os.path.splitext(temp)
                 if((os.path.isfile(temp) and ret[1].lower() in ['.avi', '.mp4']) or os.path.isdir(temp)):
@@ -68,10 +70,7 @@ class GetDataHandler(tornado.web.RequestHandler):
                         if(len(ret) > 0):
                             identifier = path
                         identifiers.append("'{}'".format(identifier))
-        ret = self.getData(identifiers)
-        self.__db.release()
-        respon_json = tornado.escape.json_encode(ret)
-        self.write(respon_json)
+        return identifiers
 
     def getData(self, options):
         ret = self.__movie_model.get(options)

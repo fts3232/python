@@ -58,7 +58,11 @@ class App extends Component {
                                 }
                             })
                         })
-                        _this.setState({'getData':false})
+                        if(_this.state.canPlay == true && _this.state.title !=false || _this.state.star !=false || _this.state.tag !=false){
+                            _this.setState({'end':true,'getData':false})
+                        }else{
+                            _this.setState({'getData':false})
+                        }
                     }else{
                         _this.setState({'end':true,'getData':false})
                     }
@@ -71,11 +75,9 @@ class App extends Component {
     componentDidMount(){
         let _this = this
         let socket = new WebSocket('ws://localhost:8000/socket')
-        if(socket.readyState == 1){
-            // 打开Socket 
-            socket.onopen = function(event) { 
-              console.log('连接成功')
-            }
+        // 打开Socket 
+        socket.onopen = function(event) { 
+          console.log('连接成功')
             // 监听消息
             socket.onmessage = function(event) { 
                 let data = JSON.parse(event.data)
@@ -85,13 +87,14 @@ class App extends Component {
                     alert(data.msg)
                 }
             }; 
-            // 监听Socket的关闭
-            socket.onclose = function(event) { 
-              console.log('Client notified socket has closed',event); 
-              // 关闭Socket.... 
-              //socket.close() 
-            }; 
         }
+       
+        // 监听Socket的关闭
+        socket.onclose = function(event) { 
+          console.log('Client notified socket has closed',event); 
+          // 关闭Socket.... 
+          //socket.close() 
+        }; 
         this.socket = socket
         this.getData()
         $(window).resize(()=>{

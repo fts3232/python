@@ -3,11 +3,9 @@ import math
 import difflib
 
 
-def findMovie(roots, filename, suffix=None):
+def findMovie(roots, filename, suffix=None, ratio=0, data=None):
     if(type(roots) == str):
         roots = [roots]
-    ratio = 0
-    data = None
     for root in roots:
         for path in os.listdir(root):
             if((filename.lower() in path.lower() or filename.lower().replace('-', '') in path.lower()) or filename.lower() in root.lower()):
@@ -18,5 +16,5 @@ def findMovie(roots, filename, suffix=None):
                         ratio = path_ratio
                         data = temp
                 elif(os.path.isdir(temp)):
-                    return findMovie(temp, filename, suffix)
+                    return findMovie(temp, filename, suffix, ratio, data)
     return data

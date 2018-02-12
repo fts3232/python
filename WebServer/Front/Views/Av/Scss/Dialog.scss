@@ -89,7 +89,7 @@
         & .star{
     		border-bottom: 1px solid #E1E1E1;
     		margin-top: 10px;
-		    height: 200px;
+		    height: 180px;
     		overflow: auto;
         	& .star-item{
         		cursor: pointer;
@@ -195,11 +195,12 @@
 	    }
 		& .wrapper{
 			position: absolute;
-			width: 70%;
-			top: 20%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			background: #fff;
+		    margin: 0;
+		    width: 70%;
+		    top: 50%;
+		    left: 50%;
+		    transform: translate(-50%, -50%);
+		    background: #fff;
 			& .close{
 	    	    background: #eee;
 			    border-radius: 50%;
@@ -216,6 +217,8 @@
 		        user-select: none;
 	        }
 			& a{
+				width:100%;
+			    word-break: break-all;
 			    text-decoration: none;
 			    color: #000;
 			    display: inline-block;
