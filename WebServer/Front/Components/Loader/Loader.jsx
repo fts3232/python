@@ -38,7 +38,7 @@ class Loader extends Component {
     render() {
         return (
             <div className="Loader">
-                <button className="back-home"><Link to="/">返回</Link></button>
+                <Link to="/"><button className="back-home">返回</button></Link>
                 {this.state.Component}
             </div>
         )
