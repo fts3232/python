@@ -17,7 +17,7 @@ class Tag extends Component {
   componentDidMount(){
     let _this = this
     new Promise((resolve,reject)=>{
-        let url = 'http://localhost:8000/getTag'
+        let url = 'http://localhost:8000/getData/tag'
         request.get(url)
                .end(function(err, res){
                     if(typeof res != 'undefined' && res.ok){

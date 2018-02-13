@@ -5,7 +5,6 @@ import socket
 import time
 import http.cookiejar
 import threading
-import os
 import gzip
 import zlib
 

@@ -28,10 +28,9 @@ class JavBus():
         self.__visitor = Visitor(stdout)
         self.__pool = ConnectionPool
         self.__stdout = stdout
-        self.check_table()
+        # self.check_table()
         if(os.path.exists(self.__path) is False):
             os.mkdir(self.__path)
-        self.get_host()
 
     # 创建数据表
     def check_table(self):
@@ -291,6 +290,7 @@ class JavBus():
                 time.sleep(sleep)
 
     def search(self, identifiers):
+        self.get_host()
         self.__stdout('开始爬取数据...')
         conn = self.__pool.conn()
         threads = []
@@ -304,11 +304,13 @@ class JavBus():
         self.__stdout('结束...')
 
     def updateMovie(self, movie_id, identifier):
+        self.get_host()
         self.__stdout('开始爬取数据...')
         self.visit_single("{host}/{identifier}".format(host=self.__host, identifier=identifier), movie_id)
         self.__stdout('结束...')
 
     def run(self):
+        self.get_host()
         self.__stdout('开始爬取数据...')
         page = 0
         while(page < self.__page):

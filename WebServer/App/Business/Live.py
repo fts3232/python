@@ -3,8 +3,6 @@ import os
 import re
 import pickle
 from urllib.parse import urlparse
-import sys
-sys.path.append("../")
 from Config.Live import config
 from Lib.Visitor import Visitor
 
@@ -84,10 +82,10 @@ class Live():
 
     def run(self):
         print('开始爬取数据...')
-        if(os.path.exists('../../Storage/live.pkl') is not True):
+        if(os.path.exists(os.path.join(os.getcwd(), 'Storage/live.pkl')) is not True):
             rooms = {}
         else:
-            fo = open('../../Storage/live.pkl', 'rb+')
+            fo = open(os.path.join(os.getcwd(), 'Storage/live.pkl'), 'rb+')
             ret = fo.read()
             fo.close()
             rooms = {}
@@ -105,7 +103,7 @@ class Live():
                 # print("{nickname} {state} 分类：{category} 标题：{room_name} 封面：{screenshot}".format(nickname=ret['nickname'], state=ret['state'], room_name=ret['room_name'], category=ret['category'], screenshot=ret['screenshot']))
                 rooms[host][room] = ret
                 time.sleep(1)
-        fo = open('../../Storage/live.pkl', 'wb+')
+        fo = open(os.path.join(os.getcwd(), 'Storage/live.pkl'), 'wb+')
         fo.write(pickle.dumps(rooms))
         fo.close()
         print('结束...')

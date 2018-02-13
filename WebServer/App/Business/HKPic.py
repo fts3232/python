@@ -3,8 +3,6 @@ import time
 import os
 import re
 import pickle
-import sys
-sys.path.append("../")
 from Config.HKPic import config
 from Lib.Visitor import Visitor
 

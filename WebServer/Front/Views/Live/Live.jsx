@@ -9,6 +9,10 @@ class Live extends Component {
         }
 	}
     getData(){
+        let data = JSON.stringify({'event':'getLive','msg':''})
+        this.socket.send(data)
+    }
+    updateData(){
         let data = JSON.stringify({'event':'updateLive','msg':''})
         this.socket.send(data)
     }
@@ -18,11 +22,14 @@ class Live extends Component {
         // 打开Socket 
         socket.onopen = function(event) { 
             console.log('连接成功')
+            _this.getData()
             // 监听消息
             socket.onmessage = function(event) { 
                 let data = JSON.parse(event.data)
-                if(data.event=='Live'){
+                if(data.event=='getLive'){
                     _this.setState({'data':data.msg})
+                }else if(data.event=='updateLive'){
+                    _this.refs.header.setState({'loading':false})
                 }
             }; 
         }
@@ -79,7 +86,7 @@ class Live extends Component {
         }
         return (
             <div ref="app" className="live-list-page">
-                <Header />
+                <Header ref="header" />
                 {group}
             </div>
         )

@@ -1,0 +1,7 @@
+.live-list-page{
+    & .header{
+        & button.loading{
+            opacity: 0.35
+        }
+    }
+}

@@ -16,7 +16,7 @@ class Comic extends Component {
         let _this = this;
         this.setState({'getData':true},()=>{
             new Promise((resolve,reject)=>{
-                let url = 'http://localhost:8000/getComic'
+                let url = 'http://localhost:8000/getData/comic'
                 request.get(url)
                        .end(function(err, res){
                             if(typeof res !='undefined' && res.ok){

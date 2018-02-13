@@ -15,31 +15,4 @@
 	    padding: 0 15px;
 	    transition: border-color .2s cubic-bezier(.645,.045,.355,1);
     }
-    & button{
-	    color: #fff;
-	    background-color: #409eff;
-	    border-color: #409eff;
-        border-radius: 4px;
-        padding:12px 20px;
-        cursor: pointer;
-        margin-right:10px;
-        transform: 1.1s;
-        &:last-child{
-        	margin-right: 0;
-        }
-        &.switch{
-            background-color: #dcdfe6;
-            border-color: #dcdfe6;
-            outline: none;
-            &.on{
-                background-color: #409eff;
-                border-color: #409eff;
-            }
-        }
-	}
-	& button:hover{
-	    color: #fff;
-        background: #66b1ff;
-		border-color: #66b1ff;
-	}
 }

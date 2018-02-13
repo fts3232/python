@@ -25,7 +25,7 @@ class App extends Component {
         if(_this.state.getData==false){
             this.setState({'getData':true},()=>{
                 new Promise((resolve,reject)=>{
-                    let url = 'http://localhost:8000/getData?p='+page+'&size=24'
+                    let url = 'http://localhost:8000/getData/av?p='+page+'&size=24'
                     if(_this.state.canPlay == true)
                         url += '&canPlay=1'
                     if(_this.state.title != false)

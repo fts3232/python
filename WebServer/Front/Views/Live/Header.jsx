@@ -3,17 +3,23 @@ import Component from '../../Components/Component';
 class Header extends Component {
   	constructor(props){
   		super(props);
+      this.state = {
+        'loading':false
+      }
   	}
     parent(){
         return this.context.component
     }
     update(){
-      this.parent().getData()
+      if(!this.state.loading){
+        this.setState({'loading':true})
+        this.parent().updateData()
+      }
     }
     render() {
         return (
             <div className="header">
-                <button onClick={this.update.bind(this)}>更新数据</button>
+                <button className={this.classNames({'loading':this.state.loading})} onClick={this.update.bind(this)}>{this.state.loading?'加载中':'更新数据'}</button>
             </div>
         )
     }

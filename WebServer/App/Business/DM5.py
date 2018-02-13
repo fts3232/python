@@ -1,6 +1,4 @@
-import sys
 from time import time
-sys.path.append("../")
 from Config.DM5 import config
 from Lib.Visitor import Visitor
 

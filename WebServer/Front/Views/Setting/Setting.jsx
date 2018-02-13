@@ -12,31 +12,30 @@ class Setting extends Component {
           component: this
         };
     }
-    getData(){
-        let _this = this;
-        this.setState({'getData':true},()=>{
-            new Promise((resolve,reject)=>{
-                let url = 'http://localhost:8000/getLive'
-                request.get(url)
-                       .end(function(err, res){
-                            if(res.ok){
-                                resolve(JSON.parse(res.text))
-                            }else{
-                                reject(err)
-                            }
-                       })
-            }).then((data)=>{
-                _this.setState({'data':data})
-            })
-        })
-    }
     componentDidMount(){
-        this.getData()
+        
+    }
+    createDB(){
+        let _this = this;
+        new Promise((resolve,reject)=>{
+            let url = 'http://localhost:8000/setting/createDB'
+            request.get(url)
+                   .end(function(err, res){
+                        if(typeof res !='undefined' && res.ok){
+                            resolve(JSON.parse(res.text))
+                        }else{
+                            reject(err)
+                        }
+                   })
+        }).then((data)=>{
+            alert(data.msg)
+        })
     }
     render() {
         return (
-            <div ref="app" className="list-page">
-                
+            <div ref="app" className="setting-page">
+                <h3>JavBus</h3>
+                <button onClick={this.createDB.bind(this)}>创建数据库</button>
             </div>
         )
     }

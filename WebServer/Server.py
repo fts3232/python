@@ -4,9 +4,8 @@ import sys
 import os
 sys.path.append("./App")
 from Handler.GetDataHandler import GetDataHandler
-from Handler.GetTagHandler import GetTagHandler
 from Handler.SocketHandler import SocketHandler
-from Handler.GetComicHandler import GetComicHandler
+from Handler.SettingHandler import SettingHandler
 from Lib.Mysql import ConnectionPool
 # from Lib.Jobs import Jobs
 from Config.DB import config
@@ -27,10 +26,9 @@ settings = {
 }
 
 application = tornado.web.Application([
-    (r"/getData", GetDataHandler, dict(pool=pool)),
-    (r"/getTag", GetTagHandler, dict(pool=pool)),
     (r"/socket", SocketHandler, dict(pool=pool)),
-    (r"/getComic", GetComicHandler),
+    (r"/setting/(\w*?)", SettingHandler, dict(pool=pool)),
+    (r"/getData/(\w*?)", GetDataHandler, dict(pool=pool)),
     (r"/(.*?)", tornado.web.StaticFileHandler, dict(path='Build', default_filename="index.html")),
     # (r"/css/(.*)", tornado.web.StaticFileHandler, dict(path='Build/css')),
     # (r"/js/(.*)", tornado.web.StaticFileHandler, dict(path='Build/js')),

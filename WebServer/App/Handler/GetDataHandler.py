@@ -1,13 +1,12 @@
 import os
 import tornado.web
-import sys
-sys.path.append("../")
 from Helpers.functions import findMovie
 from Model.Movie import Movie
 from Model.Tag import Tag
 from Model.Star import Star
 from Model.DownloadLink import DownloadLink
 from Model.Sample import Sample
+from Business.DM5 import DM5
 import re
 
 
@@ -27,7 +26,11 @@ class GetDataHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
-    def get(self):
+    def get(self, action):
+        func = getattr(self, action)
+        func()
+
+    def av(self):
         p = int(self.get_argument('p', default=1))
         size = int(self.get_argument('size', default=12))
         title = self.get_argument('title', default=None)
@@ -41,7 +44,7 @@ class GetDataHandler(tornado.web.RequestHandler):
             if(options['title'] is None and options['star'] is None and options['tag'] is None):
                 identifiers = identifiers[offset:offset + size]
             options['identifiers'] = identifiers
-        ret = self.getData(options)
+        ret = self.getAVData(options)
         self.__db.release()
         respon_json = tornado.escape.json_encode(ret)
         self.write(respon_json)
@@ -50,29 +53,30 @@ class GetDataHandler(tornado.web.RequestHandler):
         roots = ['E:\迅雷下载', 'D:\QQDownload', 'D:\Downloads']
         identifiers = []
         for root in roots:
-            paths = os.listdir(root)
-            paths = sorted(paths, key=lambda x: os.path.getmtime(os.path.join(root, x)), reverse=True)
-            for path in paths:
-                temp = "{root}/{path}".format(root=root, path=path)
-                ret = os.path.splitext(temp)
-                if((os.path.isfile(temp) and ret[1].lower() in ['.avi', '.mp4']) or os.path.isdir(temp)):
-                    ret = re.findall('([A-Za-z]{2,})-?(\d{3,4})(-\d+)?', path)
-                    if(len(ret) > 0):
-                        ret = ret[-1]
-                        num = ret[1]
-                        if(len(num) >= 4 and num[0] == '0' and ret[0] != 'heyzo'):
-                            num = num[1:]
-                        if(ret[2] != ''):
-                            identifier = "{series}-{num}-{extra}".format(series=ret[0], num=num, extra=ret[2][1:])
-                        else:
-                            identifier = "{series}-{num}".format(series=ret[0], num=num)
-                        ret = re.findall('\d{6,}', path)
+            if(os.path.exists(root)):
+                paths = os.listdir(root)
+                paths = sorted(paths, key=lambda x: os.path.getmtime(os.path.join(root, x)), reverse=True)
+                for path in paths:
+                    temp = "{root}/{path}".format(root=root, path=path)
+                    ret = os.path.splitext(temp)
+                    if((os.path.isfile(temp) and ret[1].lower() in ['.avi', '.mp4']) or os.path.isdir(temp)):
+                        ret = re.findall('([A-Za-z]{2,})-?(\d{3,4})(-\d+)?', path)
                         if(len(ret) > 0):
-                            identifier = path
-                        identifiers.append("'{}'".format(identifier))
+                            ret = ret[-1]
+                            num = ret[1]
+                            if(len(num) >= 4 and num[0] == '0' and ret[0] != 'heyzo'):
+                                num = num[1:]
+                            if(ret[2] != ''):
+                                identifier = "{series}-{num}-{extra}".format(series=ret[0], num=num, extra=ret[2][1:])
+                            else:
+                                identifier = "{series}-{num}".format(series=ret[0], num=num)
+                            ret = re.findall('\d{6,}', path)
+                            if(len(ret) > 0):
+                                identifier = path
+                            identifiers.append("'{}'".format(identifier))
         return identifiers
 
-    def getData(self, options):
+    def getAVData(self, options):
         ret = self.__movie_model.get(options)
         for x in ret:
             # 可否播放
@@ -105,3 +109,14 @@ class GetDataHandler(tornado.web.RequestHandler):
             samples = self.__sample_model.get(x['MOVIE_ID'])
             x["SAMPLE"] = samples
         return ret
+
+    def comic(self):
+        ret = DM5().run()
+        respon_json = tornado.escape.json_encode(ret)
+        self.write(respon_json)
+
+    def tag(self):
+        ret = self.__tag_model.getAll()
+        self.__db.release()
+        respon_json = tornado.escape.json_encode(ret)
+        self.write(respon_json)

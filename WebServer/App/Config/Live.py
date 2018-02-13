@@ -3,7 +3,6 @@ config = {
         'douyu': [
             'https://www.douyu.com/aleng1106',
             'https://www.douyu.com/196',
-            'https://www.douyu.com/asmr',
             'https://www.douyu.com/tao15',
             'https://www.douyu.com/xiaojiujiu',
             'https://www.douyu.com/109064',

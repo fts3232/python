@@ -3,7 +3,6 @@ import json
 import importlib
 
 
-
 class SocketHandler(WebSocketHandler):
     __pool = None
     users = set()  # 用来存放在线用户的容器
@@ -17,14 +16,15 @@ class SocketHandler(WebSocketHandler):
         # for u in self.users:  # 向已在线用户发送消息
         #     u.write_message(u"[%s]-[%s]-进入聊天室" % (self.request.remote_ip, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
-    def sendMessage(self, event, message):
+    def sendMessage(self, event, message=''):
         self.write_message({'event': event, 'msg': message})
 
     def on_message(self, message):
         message = json.loads(message)
-        module = importlib.import_module('Business.SocketEvent.{method}'.format(method=message['event']))
-        obj = getattr(module, message['event'])
-        event = obj(options={'pool': self.__pool, 'print': self.sendMessage, 'data': message['msg']})
+        event = message['event'][0].upper() + message['event'][1:]
+        module = importlib.import_module('Business.SocketEvent.{method}'.format(method=event))
+        obj = getattr(module, event)
+        event = obj(options={'pool': self.__pool, 'print': self.sendMessage, 'data': event})
         event.run()
 
     def on_close(self):

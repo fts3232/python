@@ -13,7 +13,7 @@ class Spider():
         task.start()
 
     def threading(self):
-        JavBus(self.__pool, self.sendMessage).run()
+        JavBus(self.__options['pool'], self.sendMessage).run()
 
     def sendMessage(self, msg):
         self.__options['print']('spider', msg)
