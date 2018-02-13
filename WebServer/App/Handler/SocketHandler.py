@@ -24,7 +24,7 @@ class SocketHandler(WebSocketHandler):
         event = message['event'][0].upper() + message['event'][1:]
         module = importlib.import_module('Business.SocketEvent.{method}'.format(method=event))
         obj = getattr(module, event)
-        event = obj(options={'pool': self.__pool, 'print': self.sendMessage, 'data': event})
+        event = obj(options={'pool': self.__pool, 'print': self.sendMessage, 'data': message['msg']})
         event.run()
 
     def on_close(self):

@@ -59,7 +59,7 @@ class Dialog extends Component {
         this.onClose()
     }
     openDir(identifier){
-        this.parent().socketSend('open-dir',identifier)
+        this.parent().socketSend('openDir',identifier)
     }
     thumbPrev(){
         let currentIndex = this.state.thumb_index
