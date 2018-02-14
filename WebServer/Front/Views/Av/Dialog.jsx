@@ -142,7 +142,7 @@ class Dialog extends Component {
                     <div className="image-wrapper">
                         <div>
                             <span className="close" onClick={this.bigImageClose.bind(this)}>X</span>
-                            <img src="http://dev.www.202.hk/images/company/license1.jpg"/>
+                            <img />
                             <span onClick={this.thumbPrev.bind(this)} className="prev-btn">&lt;</span>
                             <span onClick={this.thumbNext.bind(this)} className="next-btn">&gt;</span>
                         </div>
