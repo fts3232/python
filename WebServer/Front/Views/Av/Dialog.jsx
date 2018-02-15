@@ -61,7 +61,8 @@ class Dialog extends Component {
     openDir(identifier){
         this.parent().socketSend('openDir',identifier)
     }
-    thumbPrev(){
+    thumbPrev(e){
+        e.stopPropagation()
         let currentIndex = this.state.thumb_index
         if(currentIndex==0){
             currentIndex = this.state.data.SAMPLE.length - 1
@@ -72,7 +73,8 @@ class Dialog extends Component {
         $(this.refs.big_image).find('img').attr('src',src)
         this.setState({'thumb_index':currentIndex})
     }
-    thumbNext(){
+    thumbNext(e){
+        e.stopPropagation()
         let currentIndex = this.state.thumb_index
         if(currentIndex==this.state.data.SAMPLE.length - 1){
             currentIndex = 0
@@ -139,9 +141,8 @@ class Dialog extends Component {
                     </div>
                 </div>
                 <div className="big-image" ref="big_image">
-                    <div className="image-wrapper">
+                    <div className="image-wrapper" onClick={this.bigImageClose.bind(this)}>
                         <div>
-                            <span className="close" onClick={this.bigImageClose.bind(this)}>X</span>
                             <img />
                             <span onClick={this.thumbPrev.bind(this)} className="prev-btn">&lt;</span>
                             <span onClick={this.thumbNext.bind(this)} className="next-btn">&gt;</span>
