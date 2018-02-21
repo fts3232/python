@@ -3,7 +3,7 @@ import json
 import importlib
 
 
-class SocketHandler(WebSocketHandler):
+class Socket(WebSocketHandler):
     __pool = None
     users = set()  # 用来存放在线用户的容器
 
