@@ -4,11 +4,11 @@ import importlib
 
 
 class Socket(WebSocketHandler):
-    __pool = None
+    __app = None
     users = set()  # 用来存放在线用户的容器
 
-    def initialize(self, pool):
-        self.__pool = pool
+    def initialize(self, app):
+        self.__app = app
 
     def open(self):
         pass
@@ -24,7 +24,7 @@ class Socket(WebSocketHandler):
         event = message['event'][0].upper() + message['event'][1:]
         module = importlib.import_module('Business.SocketEvent.{method}'.format(method=event))
         obj = getattr(module, event)
-        event = obj(options={'pool': self.__pool, 'print': self.sendMessage, 'data': message['msg']})
+        event = obj(options={'app': self.__app, 'print': self.sendMessage, 'data': message['msg']})
         event.run()
 
     def on_close(self):

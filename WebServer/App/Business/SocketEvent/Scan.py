@@ -36,7 +36,8 @@ class Scan():
         task.start()
 
     def threading(self, identifiers):
-        JavBus(self.__options['pool'], self.sendMessage).search(identifiers)
+        pool = self.__options['app'].make('ConnectionPool')
+        JavBus(pool, self.sendMessage).search(identifiers)
 
     def sendMessage(self, msg):
         self.__options['print']('scan', msg)

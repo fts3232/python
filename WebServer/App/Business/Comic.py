@@ -3,7 +3,7 @@ from Config.DM5 import config
 from Lib.Visitor import Visitor
 
 
-class DM5():
+class Comic():
     'DM5'
     __visitor = None
 

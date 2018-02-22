@@ -1,24 +1,22 @@
-import tornado.web
 import json
 
 
-class Controller(tornado.web.RequestHandler):
+class Controller():
+    __tornado = None
+    _app = None
 
-    def initialize(self):
-        pass
+    def __init__(self, tornado, app, action):
+        self.__tornado = tornado
+        self._app = app
+        func = getattr(self, action)
+        func()
 
-    def get(self, action):
-        self.write('<html><body><p>1232</p></body></html>')
-
-    def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+    def getArgument(self, name, default):
+        return self.__tornado.get_argument(name, default=default)
 
     def json(self, data):
-        respon_json = tornado.escape.json_encode(data)
-        self.write(respon_json)
+        data = json.dumps(data)
+        self.__tornado.write(data)
 
     def display(self):
-        self.write('<html><body><p>1232</p></body></html>')
-        pass
+        self.__tornado.write('<html><body><p>1232</p></body></html>')

@@ -8,6 +8,5 @@ class UpdateLive():
         self.__options = options
 
     def run(self):
-        obj = Live()
-        obj.run()
+        Live().run()
         self.__options['print']('updateLive')

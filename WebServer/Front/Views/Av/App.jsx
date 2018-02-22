@@ -85,7 +85,7 @@ class App extends Component {
                     _this.refs.log.appendData(data.msg)
                 }else if(data.event=='play' && data.msg=='播放失败'){
                     alert(data.msg)
-                }else if(data.event=='open-dir' && data.msg=='打开失败'){
+                }else if(data.event=='openDir' && data.msg=='打开失败'){
                     alert(data.msg)
                 }
             }; 

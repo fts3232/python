@@ -1,8 +1,7 @@
-class Movie():
-    __db = None
+from . import Model
 
-    def __init__(self, db):
-        self.__db = db
+
+class Movie(Model):
 
     def get(self, options):
         where = []
@@ -25,4 +24,4 @@ class Movie():
         if(where != ''):
             where = 'where ' + where
         sql = 'select MOVIE_ID,TITLE,IDENTIFIER,TAG,STAR,PUBLISH_TIME from MOVIE {where} ORDER BY UPDATED_TIME DESC,PUBLISH_TIME DESC,CREATED_TIME DESC {limit}'.format(limit=limit, where=where)
-        return self.__db.select(sql, whereData)
+        return self._db.select(sql, whereData)

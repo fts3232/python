@@ -8,5 +8,6 @@ class UpdateMovie():
         self.__options = options
 
     def run(self):
-        JavBus(self.__options['pool']).updateMovie(self.__options['data']['movie_id'], self.__options['data']['identifier'])
+        pool = self.__options['app'].make('ConnectionPool')
+        JavBus(pool).updateMovie(self.__options['data']['movie_id'], self.__options['data']['identifier'])
         self.__options['print']('updateMovie', '修改成功')
