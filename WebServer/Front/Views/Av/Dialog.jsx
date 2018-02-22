@@ -119,10 +119,10 @@ class Dialog extends Component {
                             </div>
                             <div className="button-box">
                                 <button onClick={this.downloadShow.bind(this)}>下载</button>
-                                {data.canPlay== true && (
+                                {data.PLAY== true && (
                                         <button onClick={this.play.bind(this,data.IDENTIFIER)}>播放</button>
                                 )}
-                                {data.canPlay== true && (
+                                {data.PLAY== true && (
                                         <div className="row">
                                             <button className="set-info" onClick={this.setInfo.bind(this)}>设置资料来源</button>
                                             <button onClick={this.openDir.bind(this,data.IDENTIFIER)}>打开文件夹</button>
