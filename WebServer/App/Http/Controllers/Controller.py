@@ -18,5 +18,5 @@ class Controller():
         data = json.dumps(data)
         self.__tornado.write(data)
 
-    def display(self):
-        self.__tornado.write('<html><body><p>1232</p></body></html>')
+    def display(self, name, title, items={}):
+        self.__tornado.render(name, title=title, items=items)

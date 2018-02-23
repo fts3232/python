@@ -19,7 +19,7 @@ class ConnectionPool:
             conn = Connection(config)
             self.__pool.append(conn)
             pass
-        print('连接池链接成功')
+        print('连接池创建成功')
 
     def conn(self):
         for conn in self.__pool:

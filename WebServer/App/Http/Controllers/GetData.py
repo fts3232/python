@@ -7,7 +7,7 @@ from Business.Comic import Comic
 class GetData(Controller):
 
     def av(self):
-        business = Av(self._app)
+        business = Av()
         p = int(self.getArgument('p', default=1))
         size = int(self.getArgument('size', default=12))
         title = self.getArgument('title', default=None)
@@ -29,6 +29,5 @@ class GetData(Controller):
         self.json(ret)
 
     def tag(self):
-        business = Av(self._app)
-        ret = business.getTag()
+        ret = Av().getTag()
         self.json(ret)

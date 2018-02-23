@@ -5,15 +5,11 @@ import pickle
 from urllib.parse import urlparse
 from Config.Live import config
 from Lib.Visitor import Visitor
+from . import Business
 
 
-class Live():
+class Live(Business):
     'live'
-    # vistor类
-    __visitor = None
-
-    def __init__(self):
-        self.__visitor = Visitor()
 
     def douyu(self, room):
         parse = urlparse(room)
@@ -81,6 +77,7 @@ class Live():
             return {'nickname': nickname, 'state': state, 'room_name': room_name, 'category': category, 'screenshot': screenshot}
 
     def run(self):
+        self.__visitor = Visitor()
         print('开始爬取数据...')
         if(os.path.exists(os.path.join(os.getcwd(), 'Storage/live.pkl')) is not True):
             rooms = {}

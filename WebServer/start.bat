@@ -16,5 +16,8 @@ if /i "%zt%"=="RUNNING" (
     start /w net start mysql
     echo mysql服务启动成功
 )
+echo 等待redis服务启动
+start D:\Redis-x64-3.0.500\redis-server.exe
+echo redis服务启动成功
 start python Server.py
 start npm start

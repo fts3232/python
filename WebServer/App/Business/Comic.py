@@ -4,14 +4,10 @@ from Lib.Visitor import Visitor
 
 
 class Comic():
-    'DM5'
-    __visitor = None
-
-    def __init__(self):
-        self.__visitor = Visitor()
 
     def get_news(self):
-        ret = self.__visitor.send_request("{host}{get_news_path}{timestamp}".format(host=config['host'], get_news_path=config['get_news_path'], timestamp=int(time()) - 300), {'host': 'www.dm5.com'}).visit()
+        visitor = Visitor()
+        ret = visitor.send_request("{host}{get_news_path}{timestamp}".format(host=config['host'], get_news_path=config['get_news_path'], timestamp=int(time()) - 300), {'host': 'www.dm5.com'}).visit()
         ret = ret.replace('null', 'None')
         ret = ret.replace('true', 'True')
         ret = ret.replace('false', 'False')

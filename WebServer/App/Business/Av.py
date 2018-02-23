@@ -1,37 +1,27 @@
 import os
 import re
 from Helpers.functions import findMovie
-from Model.Movie import Movie
-from Model.Tag import Tag
-from Model.Star import Star
-from Model.DownloadLink import DownloadLink
-from Model.Sample import Sample
+from Model.Av import Av as AvModel
+from Lib.Core import GlobalManager
 
 
 class Av():
-    _app = None
 
-    def __init__(self, app):
-        self._app = app
+    def __init__(self):
         pass
 
     def getData(self, options):
-        db = self._app.make('ConnectionPool').conn()
-        movie_model = Movie(db)
-        star_model = Star(db)
-        tag_model = Tag(db)
-        downloadlink_model = DownloadLink(db)
-        sample_model = Sample(db)
-        ret = movie_model.get(options)
+        model = AvModel()
+        ret = model.getMovie(options)
         for x in ret:
             # 可否播放
-            storage_path = os.path.join(os.getcwd(), 'Storage/JavBus/Movie')
+            storage_path = os.path.join(GlobalManager.get('root'), 'Storage/JavBus/Movie')
             path = os.path.join(storage_path, x['IDENTIFIER'])
             x['PLAY'] = True if(findMovie(['E:\迅雷下载', 'D:\QQDownload', 'D:\Downloads'], x['IDENTIFIER'], ['.avi', '.mp4']) is not None) else False
             # 发布时间
             x['PUBLISH_TIME'] = x['PUBLISH_TIME'].strftime('%Y-%m-%d')
             # 下载链接
-            links = downloadlink_model.get(x['MOVIE_ID'])
+            links = model.getDownloadLink(x['MOVIE_ID'])
             x['LINK'] = []
             for link in links:
                 link['PUBLISH_TIME'] = str(link['PUBLISH_TIME'])
@@ -42,18 +32,17 @@ class Av():
                 x['IMAGE'] = 'http://localhost:8000/static/Movie/{identifier}/cover.jpg'.format(identifier=x['IDENTIFIER'])
             # 分类
             if(x['TAG'] != '' and x['TAG'] is not None):
-                tags = tag_model.get(x['TAG'])
+                tags = model.getTag(x['TAG'])
                 x['TAG'] = tags
             # 演员
             if(x['STAR'] != '' and x['STAR'] is not None):
-                stars = star_model.get(x['STAR'])
+                stars = model.getStar(x['STAR'])
                 for index, star in enumerate(stars):
                     stars[index]['IMAGE'] = 'http://localhost:8000/static/Star/{name}.jpg'.format(name=star['STAR_NAME'])
                 x['STAR'] = stars
             # 样本图链接
-            samples = sample_model.get(x['MOVIE_ID'])
+            samples = model.getSample(x['MOVIE_ID'])
             x["SAMPLE"] = samples
-        db.release()
         return ret
 
     def getCanPlay(self):
@@ -84,8 +73,5 @@ class Av():
         return identifiers
 
     def getTag(self):
-        db = self._app.make('ConnectionPool').conn()
-        tag_model = Tag(db)
-        tag = tag_model.getAll()
-        db.release()
+        tag = AvModel().getAllTag()
         return tag

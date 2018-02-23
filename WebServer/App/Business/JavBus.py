@@ -7,6 +7,7 @@ import pickle
 from datetime import datetime
 from Config.JavBus import config
 from Lib.Visitor import Visitor
+from Lib.Core import GlobalManager
 
 
 class JavBus():
@@ -22,7 +23,7 @@ class JavBus():
 
     __stdout = None
 
-    __path = os.path.join(os.getcwd(), 'Storage/JavBus')
+    __path = os.path.join(GlobalManager.get('root'), 'Storage/JavBus')
 
     def __init__(self, ConnectionPool, stdout=print):
         self.__visitor = Visitor(stdout)
