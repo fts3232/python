@@ -1,7 +1,6 @@
 import re
 import importlib
 import tornado.web
-import traceback
 import sys
 
 
@@ -40,7 +39,8 @@ class ControllerDispatcher(tornado.web.RequestHandler):
             self.set_status(404)
             self.write_error(404)
         except Exception as e:
-            self.__app.make('Log').write(e, sys.exc_info())
+            print(e)
+            # self.__app.make('Log').write(e, sys.exc_info())
             # items = {'error': traceback.format_exc()}
             self.set_status(500)
             # self.write_error(500, items)

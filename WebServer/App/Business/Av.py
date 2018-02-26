@@ -20,7 +20,7 @@ class Av():
             # 可否播放
             storage_path = self.__config['storage_path']
             path = os.path.join(storage_path, x['IDENTIFIER'])
-            x['PLAY'] = True if(self.scanLocalFolder(x['IDENTIFIER']) is not None) else False
+            x['PLAY'] = True if(self.scanLocalFolder(x['IDENTIFIER']) is not False) else False
             # 发布时间
             x['PUBLISH_TIME'] = x['PUBLISH_TIME'].strftime('%Y-%m-%d')
             # 下载链接
@@ -100,9 +100,12 @@ class Av():
                         data[tempIdentifier] = ret
                 # 如果是文件夹，合拼2个列表
                 else:
-                    ret = self.findMovie(identifier, tempPath)
+                    ret = self.scanLocalFolder(tempIdentifier, tempPath)
+                    print(ret)
                     if(ret):
                         for key in ret:
+                            print(key)
+                            print(data[key])
                             if(key not in data or ret[key]['ratio'] > data[key]['ratio']):
                                 data[key] = ret
         if(len(data) == 0):

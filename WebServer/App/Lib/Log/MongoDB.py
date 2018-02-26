@@ -23,5 +23,5 @@ class MongoDB():
 
     def write(self, exception, exc_info):
         exc_type, exc_value, exc_tb = exc_info
-        p = Log(TYPE=exc_type.__name__, ERROR=exception.msg, FILE=exception.filename, LINE=exception.lineno, TEXT=exception.text)
+        p = Log(TYPE=exc_type.__name__, ERROR=exception.message, FILE=exception.filename, LINE=exception.lineno, TEXT=exception.text)
         p.save()

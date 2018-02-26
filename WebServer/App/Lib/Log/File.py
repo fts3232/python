@@ -18,6 +18,6 @@ class File():
         if(os.path.isdir(dirname) is False):
             os.mkdir(dirname)
         fo = open(os.path.join(dirname, filename), "a")
-        data = "[{time}] \n {type}:{error} \n file: {filename}:{lineno} \n text: {text} \n".format(time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), type=exc_type.__name__, error=exception.msg, filename=exception.filename, lineno=exception.lineno, text=exception.text)
+        data = "[{time}] \n {type}:{error} \n file: {filename}:{lineno} \n text: {text} \n".format(time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), type=exc_type.__name__, error=exception.message, filename=exception.filename, lineno=exception.lineno, text=exception.text)
         fo.write(data)
         fo.close()

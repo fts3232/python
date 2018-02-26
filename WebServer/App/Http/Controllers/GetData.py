@@ -29,5 +29,5 @@ class GetData(Controller):
         self.json(ret)
 
     def tag(self):
-        ret = Av().getTag()
+        ret = Av(self._app.make('Config').get('Av')).getTag()
         self.json(ret)
