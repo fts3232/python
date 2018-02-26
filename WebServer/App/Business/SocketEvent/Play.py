@@ -1,5 +1,5 @@
 import subprocess
-from Helpers.functions import findMovie
+from Business.Av import Av
 
 
 class Play():
@@ -11,9 +11,8 @@ class Play():
     def run(self):
         try:
             msg = '播放成功'
-            roots = ['E:\迅雷下载', 'D:\QQDownload', 'D:\Downloads']
-            ret = findMovie(roots, self.__options['data'], ['.avi', '.mp4'])
-            if(ret is None):
+            ret = Av(self.__options['app'].make('Config').get('Av')).scanLocalFolder(self.__options['data'])
+            if(ret is False):
                 raise Exception('文件不存在')
             ret = subprocess.Popen('"{path}"'.format(path=ret), shell=True)
         except Exception as e:

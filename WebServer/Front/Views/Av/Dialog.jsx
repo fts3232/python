@@ -92,7 +92,7 @@ class Dialog extends Component {
             data.STAR.map((v)=>{
                 star.push(
                     <div className="star-item" onClick={this.searchStar.bind(this,v.STAR_ID)}>
-                        <img src={v.IMAGE} />
+                        <img src={'http://localhost:8000/static/Star/' + v.STAR_NAME + '.jpg'} />
                         <span className="tag">{v.STAR_NAME}</span>
                     </div>
                 )

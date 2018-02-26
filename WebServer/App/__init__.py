@@ -3,7 +3,7 @@ import tornado.web
 import os
 from Lib.Database.Mysql import ConnectionPool
 # # # from Lib.Jobs import Jobs
-from Lib.Core.Socket import Socket
+from Lib.Socket import Socket
 from Lib.Core import Config
 from Lib.Core import GlobalManager
 from Lib.Core.Container import Container

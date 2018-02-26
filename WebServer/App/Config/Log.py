@@ -3,5 +3,13 @@ import os
 
 
 config = {
-    'path': os.path.join(GlobalManager.get('root'), 'Storage/Logs'),
+    'driver': 'File',
+    'File': {
+        'path': os.path.join(GlobalManager.get('root'), 'Storage/Logs'),
+    },
+    'MongoDB': {
+        'host': 'localhost',
+        'port': 27017,
+        'db': 'test'
+    }
 }

@@ -9,7 +9,6 @@ class File():
 
     def __init__(self, config):
         self.__config = config
-        pass
 
     def getStatus(self):
         return True

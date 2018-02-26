@@ -4,7 +4,7 @@ import Header from './Header.jsx';
 import Log from './Log.jsx';
 import Tag from './Tag.jsx';
 import Component from '../../Components/Component';
-class App extends Component {
+class List extends Component {
 	constructor(props){
 		super(props);
         this.state = {
@@ -190,7 +190,7 @@ class App extends Component {
                     {this.state.data.map((val)=>{
                         return (
                             <div className="item" onClick={this.onClick.bind(this,val)}>
-                                <img src={val.IMAGE} title={val.IMAGE == ''?'暂无图片':val.TITLE}/>
+                                <img src={val.IMAGE?'http://localhost:8000/static/Movie/' + val.IDENTIFIER + '/cover.jpg':'http://localhost:8000/static/now_printing.jpg'} title={val.IMAGE?val.TITLE:'暂无图片'}/>
                                 <div className="box">
                                     <p className="title">
                                         {val.TITLE}
@@ -221,17 +221,17 @@ class App extends Component {
     }
 }
 
-App.childContextTypes = {
+List.childContextTypes = {
     component: React.PropTypes.any
 };
 
-App.PropTypes = {
+List.PropTypes = {
     space:React.PropTypes.number
 }
 
-App.defaultProps = {
+List.defaultProps = {
     space:10
 }
 
 //导出组件
-export default App;
+export default List;

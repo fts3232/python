@@ -1,21 +1,35 @@
+import importlib
 import os
-import time
 
 
 class Log():
     __config = {}
 
     def __init__(self, config):
-        self.__config = config
+        try:
+            self.__config = config
+            self.load(config['driver'])
+        except Exception as e:
+            self.load('File')
 
-    def write(self, data):
-        today = time.strftime("%Y-%m-%d", time.localtime())
-        filename = "{}.txt".format(today)
-        path = self.__config['path']
-        dirname = os.path.join(os.getcwd(), path)
-        if(os.path.isdir(dirname) is False):
-            os.mkdir(dirname)
-        fo = open(os.path.join(dirname, filename), "a")
-        data = "[{time}] {message} \n".format(time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), message=data)
-        fo.write(data)
-        fo.close()
+    def load(self, driver):
+        config = self.__config
+        config = config[driver]
+        dirname = os.path.dirname(__file__)
+        filename = "{}.py".format(driver)
+        if(os.path.isfile(os.path.join(dirname, filename)) is False):
+            raise Exception("Log驱动：{}-不存在".format(driver))
+        if(__name__ != '__main__'):
+            namespace = __name__ + '.' + driver
+        else:
+            namespace = driver
+        module = importlib.import_module(namespace)
+        obj = getattr(module, driver)
+        instance = obj(config)
+        self.__instance = instance
+        print("Log驱动：{}-加载成功".format(driver))
+
+    def __getattr__(self, funcname):
+        if(hasattr(self.__instance, funcname)):
+            return getattr(self.__instance, funcname)
+        return False

@@ -1,2 +1,2 @@
-import App from './App.jsx';
-export default App;
+import List from './List.jsx';
+export default List;
