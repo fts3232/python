@@ -1,6 +1,9 @@
 class Router():
     __router = {'get': {}, 'post': {}, 'put': {}, 'delete': {}}
 
+    def __init__(self, route):
+        route(self)
+
     def get(self, path, controller):
         self.bind('get', path, controller)
 

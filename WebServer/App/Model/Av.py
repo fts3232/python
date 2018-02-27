@@ -16,7 +16,11 @@ class Av(Model):
         where = []
         whereData = {}
         if('identifiers' in options):
-            where.append("IDENTIFIER IN({})".format(','.join(options['identifiers'])))
+            identifiers = ""
+            for identifier in options['identifiers']:
+                identifiers += "'{}',".format(identifier)
+            identifiers = identifiers[:-1]
+            where.append("IDENTIFIER IN({})".format(identifiers))
             limit = ''
         else:
             limit = 'LIMIT {offset},{size}'.format(offset=options['offset'], size=options['size'])

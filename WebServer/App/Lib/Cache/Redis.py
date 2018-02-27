@@ -1,20 +1,14 @@
 import redis
+from .Factory import Factory
 
 
-class Redis():
+class Redis(Factory):
     __instance = None
-    __status = False
 
     def __init__(self, config):
+        Factory.__init__(self)
         self.__instance = redis.Redis(host=config['host'], port=config['port'], db=config['db'])
-        try:
-            self.__instance.ping()
-            self.__status = True
-        except Exception as e:
-            self.__status = False
-
-    def getStatus(self):
-        return self.__status
+        self.__instance.ping()
 
     def get(self, key):
         return self.__instance.get(key)

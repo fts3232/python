@@ -101,11 +101,8 @@ class Av():
                 # 如果是文件夹，合拼2个列表
                 else:
                     ret = self.scanLocalFolder(tempIdentifier, tempPath)
-                    print(ret)
                     if(ret):
                         for key in ret:
-                            print(key)
-                            print(data[key])
                             if(key not in data or ret[key]['ratio'] > data[key]['ratio']):
                                 data[key] = ret
         if(len(data) == 0):

@@ -11,7 +11,7 @@ class Cache():
             self.__config = config
             self.load(config['driver'])
         except Exception as e:
-            print(str(e))
+            print("Cache驱动：{}-加载失败 错误：{}".format(config['driver'], str(e)))
             self.load('File')
 
     def load(self, driver):
@@ -27,10 +27,7 @@ class Cache():
             namespace = driver
         module = importlib.import_module(namespace)
         obj = getattr(module, driver)
-        instance = obj(config)
-        if(instance.getStatus() is False):
-            raise Exception("Cache驱动：{}-加载失败".format(driver))
-        self.__instance = instance
+        self.__instance = obj(config)
         print("Cache驱动：{}-加载成功".format(driver))
 
     def __getattr__(self, funcname):

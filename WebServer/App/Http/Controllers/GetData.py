@@ -19,6 +19,7 @@ class GetData(Controller):
         if(canPlay is True):
             identifiers = business.scanLocalFolder()
             if(options['title'] is None and options['star'] is None and options['tag'] is None):
+                identifiers = list(identifiers.keys())
                 identifiers = identifiers[offset:offset + size]
             options['identifiers'] = identifiers
         ret = business.getData(options)

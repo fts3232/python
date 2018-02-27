@@ -28,10 +28,10 @@ class Application(Container):
         self.singleton('ConnectionPool', lambda app: ConnectionPool(app.make('Config').get('DB')))
         GlobalManager.set('ConnectionPool', self.make('ConnectionPool'))
 
-        self.instance('Router', Router())
-        self.singleton('Route', lambda app: Route(app.make('Router')))
-        self.singleton('Log', lambda app: Log(app.make('Config').get('Log')))
+        self.singleton('Route', Route)
+        self.singleton('Router', lambda app: Router(app.make('Route')))
 
+        self.singleton('Log', lambda app: Log(app.make('Config').get('Log')))
         self.singleton('Cache', lambda app: Cache(app.make('Config').get('Cache')))
 
         webServerConfig = self.make('Config').get('WebServer')

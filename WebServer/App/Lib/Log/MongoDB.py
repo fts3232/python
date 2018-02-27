@@ -1,5 +1,7 @@
 from mongoengine import *
 import datetime
+import traceback
+from .Factory import Factory
 
 
 class Log(Document):
@@ -7,21 +9,23 @@ class Log(Document):
     ERROR = StringField(required=True)
     FILE = StringField(required=True)
     LINE = IntField(required=True)
-    TEXT = StringField(required=True)
+    SOURCE = StringField(required=True)
+    FUNCNAME = StringField(required=True)
     CREATED_TIME = DateTimeField(default=datetime.datetime.now)
 
 
-class MongoDB():
+class MongoDB(Factory):
 
-    __config = {}
     __collection = None
     __db = None
 
     def __init__(self, config):
-        self.__config = config
-        connect(self.__config['db'], host=self.__config['host'], port=self.__config['port'])
+        Factory.__init__(config)
+        connect(self._config['db'], host=self._config['host'], port=self._config['port'])
 
-    def write(self, exception, exc_info):
+    def write(self, exc_info):
         exc_type, exc_value, exc_tb = exc_info
-        p = Log(TYPE=exc_type.__name__, ERROR=exception.message, FILE=exception.filename, LINE=exception.lineno, TEXT=exception.text)
+        tb = traceback.extract_tb(exc_tb)
+        (filename, linenum, funcname, source) = tb[-1]
+        p = Log(TYPE=exc_type.__name__, ERROR=str(exc_value), FILE=filename, LINE=linenum, SOURCE=source, FUNCNAME="{}()".format(funcname))
         p.save()
