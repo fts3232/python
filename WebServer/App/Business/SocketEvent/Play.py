@@ -14,7 +14,8 @@ class Play():
             ret = Av(self.__options['app'].make('Config').get('Av')).scanLocalFolder(self.__options['data'])
             if(ret is False):
                 raise Exception('文件不存在')
-            ret = subprocess.Popen('"{path}"'.format(path=ret), shell=True)
+            print(ret)
+            ret = subprocess.Popen('"{path}"'.format(path=ret[self.__options['data']]['path']), shell=True)
         except Exception as e:
             msg = '播放失败'
             print(e)

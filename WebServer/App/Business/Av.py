@@ -62,10 +62,14 @@ class Av():
             # 遍历
             for path in paths:
                 # 获取文件名和后缀
-                tempPath = "{root}/{path}".format(root=root, path=path)
+                tempPath = os.path.join(root, path)
                 # 判断是否文件
                 isFile = os.path.isfile(tempPath)
-                (filename, suffix) = os.path.splitext(path)
+                if(isFile):
+                    (filename, suffix) = os.path.splitext(path)
+                else:
+                    filename = path
+
                 # 忽略不是匹配后缀的文件
                 if(isFile and suffix.lower() not in self.__config['suffix']):
                     continue
@@ -104,7 +108,7 @@ class Av():
                     if(ret):
                         for key in ret:
                             if(key not in data or ret[key]['ratio'] > data[key]['ratio']):
-                                data[key] = ret
+                                data[key] = ret[key]
         if(len(data) == 0):
             data = False
         return data

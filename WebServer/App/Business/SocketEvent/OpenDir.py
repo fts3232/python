@@ -15,7 +15,7 @@ class OpenDir():
             ret = Av(self.__options['app'].make('Config').get('Av')).scanLocalFolder(self.__options['data'])
             if(ret is False):
                 raise Exception('文件夹不存在')
-            ret = subprocess.Popen('explorer "{path}"'.format(path=os.path.dirname(ret)), shell=True)
+            ret = subprocess.Popen('explorer "{path}"'.format(path=os.path.dirname(ret[self.__options['data']]['path'])), shell=True)
         except Exception as e:
             msg = '打开失败'
             print(e)
