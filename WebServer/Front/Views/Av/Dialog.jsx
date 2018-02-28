@@ -107,7 +107,7 @@ class Dialog extends Component {
                     <h3>{data.TITLE}</h3>
                     <div className="box">
                         <div className="image">
-                            <img src={data.IMAGE}  onClick={this.enlargeImage.bind(this,data.IMAGE)}/>
+                            <img src={data.IMAGE?'http://localhost:8000/static/Movie/' + data.IDENTIFIER + '/cover.jpg':'http://localhost:8000/static/now_printing.jpg'}  onClick={this.enlargeImage.bind(this,data.IMAGE)}/>
                         </div>
                         <div className="info">
                             <p>番号：{data.IDENTIFIER}</p>
