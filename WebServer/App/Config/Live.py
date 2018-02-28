@@ -1,3 +1,7 @@
+import os
+from Lib.Core import GlobalManager
+
+
 config = {
     'rooms': {
         'douyu': [
@@ -37,5 +41,6 @@ config = {
     'api': {
         'douyu': 'http://open.douyucdn.cn/api/RoomApi/room',
     },
-    'interval': 180
+    'interval': 180,
+    'storage_path': os.path.join(GlobalManager.get('root'), 'Storage')
 }

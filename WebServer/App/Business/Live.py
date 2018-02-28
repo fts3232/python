@@ -3,17 +3,21 @@ import os
 import re
 import pickle
 from urllib.parse import urlparse
-from Config.Live import config
 from Lib.Visitor import Visitor
-from . import Business
 
 
-class Live(Business):
+class Live():
     'live'
+
+    __config = {}
+
+    def __init__(self, config):
+        self.__config = config
+        pass
 
     def douyu(self, room):
         parse = urlparse(room)
-        api = config['api']['douyu'] + parse.path
+        api = self.__config['api']['douyu'] + parse.path
         body = self.__visitor.send_request(api).visit()
         if(body is not None):
             data = eval(body)
@@ -78,17 +82,18 @@ class Live(Business):
 
     def run(self):
         self.__visitor = Visitor()
+        path = os.path.join(self.__config['storage_path'], 'live.pkl')
         print('开始爬取数据...')
-        if(os.path.exists(os.path.join(os.getcwd(), 'Storage/live.pkl')) is not True):
+        if(os.path.exists(path) is not True):
             rooms = {}
         else:
-            fo = open(os.path.join(os.getcwd(), 'Storage/live.pkl'), 'rb+')
+            fo = open(path, 'rb+')
             ret = fo.read()
             fo.close()
             rooms = {}
-        for host in config['rooms']:
+        for host in self.__config['rooms']:
             rooms[host] = {}
-            for room in config['rooms'][host]:
+            for room in self.__config['rooms'][host]:
                 if('douyu' == host):
                     ret = self.douyu(room)
                 elif('huya' == host):
@@ -100,7 +105,17 @@ class Live(Business):
                 # print("{nickname} {state} 分类：{category} 标题：{room_name} 封面：{screenshot}".format(nickname=ret['nickname'], state=ret['state'], room_name=ret['room_name'], category=ret['category'], screenshot=ret['screenshot']))
                 rooms[host][room] = ret
                 time.sleep(1)
-        fo = open(os.path.join(os.getcwd(), 'Storage/live.pkl'), 'wb+')
+        fo = open(path, 'wb+')
         fo.write(pickle.dumps(rooms))
         fo.close()
         print('结束...')
+        return rooms
+
+    def get(self):
+        path = os.path.join(self.__config['storage_path'], 'live.pkl')
+        fo = open(path, 'rb+')
+        ret = fo.read()
+        live_list = pickle.loads(ret)
+        for x in live_list:
+            live_list[x] = sorted(live_list[x].items(), key=lambda item: item[1]['state'], reverse=True)
+        return live_list

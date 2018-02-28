@@ -9,8 +9,28 @@ class Live extends Component {
         }
 	}
     getData(){
-        let data = JSON.stringify({'event':'getLive','msg':''})
-        this.socket.send(data)
+        let _this = this
+        this.setState({'loading':true},()=>{
+            new Promise((resolve,reject)=>{
+                let url = 'http://localhost:8000/getData/live'
+                request.get(url)
+                       .end(function(err, res){
+                            if(typeof res != 'undefined' && res.ok){
+                                resolve(JSON.parse(res.text))
+                            }else{
+                                reject(err)
+                            }
+                       })
+            }).then((data)=>{
+                if(data!=''){
+                    _this.setState({'loading':false,'data':data})
+                }else{
+                    _this.setState({'loading':false})
+                }
+            }).catch((err)=>{
+                _this.setState({'loading':false})
+            })
+        })
     }
     updateData(){
         let data = JSON.stringify({'event':'updateLive','msg':''})
@@ -26,11 +46,7 @@ class Live extends Component {
             // 监听消息
             socket.onmessage = function(event) { 
                 let data = JSON.parse(event.data)
-                if(data.event=='getLive'){
-                    _this.setState({'data':data.msg})
-                }else if(data.event=='updateLive'){
-                    _this.refs.header.setState({'loading':false})
-                }
+                _this.refs.header.setState({'loading':false,'data':data.msg})
             }; 
         }
         // 监听Socket的关闭

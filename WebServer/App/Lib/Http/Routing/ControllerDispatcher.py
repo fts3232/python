@@ -2,7 +2,6 @@ import re
 import importlib
 import tornado.web
 import sys
-import traceback
 
 
 class ControllerDispatcher(tornado.web.RequestHandler):

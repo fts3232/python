@@ -14,7 +14,7 @@ class Home extends Component {
           <Link to="/av"><div className="block av">A</div></Link>
           <Link to="/live"><div className="block live">直</div></Link>
           <Link to="/comic"><div className="block comic">漫</div></Link>
-          <Link to="/dnf"><div className="block setting">D</div></Link>
+          <Link to="/cashbook"><div className="block cashbook">账</div></Link>
           <Link to="/setting"><div className="block setting">设</div></Link>
         </div>
     )

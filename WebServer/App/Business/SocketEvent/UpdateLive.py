@@ -8,5 +8,5 @@ class UpdateLive():
         self.__options = options
 
     def run(self):
-        Live().run()
-        self.__options['print']('updateLive')
+        ret = Live(self.__options['app'].make('Config').get('Live')).run()
+        self.__options['print']('updateLive', ret)

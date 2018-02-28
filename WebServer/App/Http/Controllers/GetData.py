@@ -2,6 +2,7 @@
 from . import Controller
 from Business.Av import Av
 from Business.Comic import Comic
+from Business.Live import Live
 
 
 class GetData(Controller):
@@ -31,4 +32,8 @@ class GetData(Controller):
 
     def tag(self):
         ret = Av(self._app.make('Config').get('Av')).getTag()
+        self.json(ret)
+
+    def live(self):
+        ret = Live(self._app.make('Config').get('Live')).get()
         self.json(ret)
