@@ -62,7 +62,7 @@ class Visitor:
 
     def __init__(self, stdout=print):
         # 设置保存cookie的文件，同级目录下的cookie.txt
-        #filename = 'cookie.txt'
+        # filename = 'cookie.txt'
         # 声明一个MozillaCookieJar对象实例来保存cookie，之后写入文件
         # 使用cookie
         self.__cookiejar = http.cookiejar.CookieJar()
@@ -109,7 +109,7 @@ class Visitor:
                 data = bytes(urllib.parse.urlencode(data), encoding='utf8')
             request = urllib.request.Request(url, data=data, headers=self.get_headers(options))
             response = self.__urlOpener.open(request)
-            #self.__cookiejar.save(ignore_discard=True, ignore_expires=True)
+            # self.__cookiejar.save(ignore_discard=True, ignore_expires=True)
             result = response.read()
             encoding = response.info().get('Content-Encoding')
             if(encoding == 'gzip'):
@@ -162,3 +162,7 @@ class Visitor:
             thread.join()
         self.__stdout(self.__result)
         return self.__result['url']
+
+
+v = Visitor()
+print(v.send_request('http://uat.m.202.hk').visit())
