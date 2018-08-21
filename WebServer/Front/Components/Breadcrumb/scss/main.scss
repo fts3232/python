@@ -1,0 +1,20 @@
+.breadcrumb{
+    padding: 15px;
+    & li {
+        display: inline-block;
+        & a{
+            color: #999999;
+        }
+        &.active{
+            color: #65CEA7;
+        }
+        &:before{
+            padding: 0 5px;
+            color: #ccc;
+            content: "/";
+        }
+        &:first-child:before{
+            content:none;
+        }
+    }
+}

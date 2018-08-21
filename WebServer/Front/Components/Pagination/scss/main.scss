@@ -1,0 +1,30 @@
+.pagination {
+    float: right;
+    margin-bottom: 15px;
+    padding: 15px 0;
+    & li {
+        float: left;
+        margin: 0 1px;
+        border: 1px solid #ddd;
+        list-style: none;
+        & a {
+            color: #797979;
+            padding: 5px 10px;
+            display: inline-block;
+            user-select: none;
+            cursor: pointer;
+        }
+        &.active a, &:hover a {
+            color: #fff;
+            background: #65cea7;
+            transition: all 0.3s;
+        }
+        &.disabled {
+            & a, &:hover a {
+                background:none;
+                cursor: no-drop;
+                color: #c7c7c7;
+            }
+        }
+    }
+}

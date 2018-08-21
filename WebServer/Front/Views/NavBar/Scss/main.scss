@@ -1,0 +1,17 @@
+.nav-bar {
+    background: #424f63;
+    width: 240px;
+    position: fixed;
+    height: 100%;
+    & li {
+        color: #fff;
+        padding: 12px 20px;
+        & a {
+            display: block;
+        }
+        &.active, &:hover{
+            color: #65CEA7;
+            background-color: #2A323F;
+        }
+    }
+}

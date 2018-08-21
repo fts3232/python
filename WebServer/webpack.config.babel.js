@@ -63,7 +63,17 @@ let config = {
         test: /\.scss$/, 
         loader: ExtractTextPlugin.extract({
           //fallback: "style-loader",
-          use: ["css-loader","postcss-loader",'sass-loader'],
+          use: [
+              {
+                  loader: 'css-loader',
+                  options: {
+                      modules: true,
+                      localIdentName: '[local]'
+                  }
+              },
+              "postcss-loader",
+              'sass-loader'
+          ],
         }),
         include:APP_PATH
       },
@@ -108,7 +118,7 @@ let config = {
     'prop-types':'React.PropTypes',
     'react-dom': 'ReactDOM',
     'react-router':'ReactRouter',
-    'react-router-dom':'react-router-dom',
+    'react-router-dom':'ReactRouterDOM',
     'history/createBrowserHistory':'history',//history插件
     'moment/moment.js': 'moment',//时间插件
     'pubsub-js':'PubSub',//pubSub插件

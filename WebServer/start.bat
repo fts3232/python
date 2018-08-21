@@ -19,7 +19,7 @@ if /i "%zt%"=="RUNNING" (
 sc query mongodb > nul
 if %errorlevel% NEQ 0 (
     echo 等待安装mongodb服务
-    start /w C:\"Program Files"\MongoDB\Server\3.4\bin\mongod.exe --logpath D:\MongoDB\logs\mongodb.log --logappend --dbpath D:\MongoDB\data --directoryperdb --serviceName MongoDB --install
+    start /w C:\"Program Files"\MongoDB\Server\3.4\bin\mongod.exe --logpath D:\MongoDB\logs\mongodb.log --logappend --dbpath D:\MongoDB\data --directoryperdb --serviceName MongoDB --auth --install
     echo 安装mongodb服务成功
 )else (
     echo mongodb已安装

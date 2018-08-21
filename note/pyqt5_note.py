@@ -16,7 +16,7 @@ import sys
 # QWidget 界面的基类
 #   resize(width，height) resize窗口大小
 #   move(x, y) 窗口移动到xy坐标
-#   setGeometry(w x, y, idth, height) 设置窗口大小和位置
+#   setGeometry(x, y, width, height) 设置窗口大小和位置
 #   setWidnowTitle() 设置标题
 #   setWindowIcon(icon) 设置窗口icon
 #   setToolTip(text) 设置悬浮提示

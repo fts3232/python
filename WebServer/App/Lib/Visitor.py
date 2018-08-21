@@ -86,7 +86,7 @@ class Visitor:
     # 获取头部
     def get_headers(self, options={}):
         headers = {
-            'User-Agent': 'User-Agent:Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
+            'User-Agent': 'YisouSpider',
             'X-Forwarded-For': self.create_ip(),
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'Accept-Encoding': '*',
@@ -165,4 +165,4 @@ class Visitor:
 
 
 v = Visitor()
-print(v.send_request('http://uat.m.202.hk').visit())
+print(v.send_request('http://localhost:8080/workspace/installer/laravel/public/').visit())

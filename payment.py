@@ -39,7 +39,7 @@ print(groupedSum)
 for x in groupedSum:
     for j in groupedSum[x]:
         print(j)
-# figure()
-# for x in groupSum.head():
-#     print(groupSum.head()[x])
-#show()
+figure()
+for x in groupSum.head():
+    print(groupSum.head()[x])
+show()

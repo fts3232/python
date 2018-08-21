@@ -2,10 +2,10 @@
 from PyQt5.QtWidgets import QStackedWidget, QWidget, QToolTip, QPushButton, QApplication, QMessageBox, QMainWindow, QAction, QTextEdit, QGridLayout, QLabel, QLineEdit, QSlider, QLCDNumber
 from PyQt5.QtGui import QIcon, QFont, QImage, QPixmap
 from PyQt5.QtCore import Qt, QCoreApplication, pyqtSignal, QObject, QThread, QRect, QFile
-from JavBus import JavBus
+# from JavBus import JavBus
 import sys
-from Visitor import Visitor
-from Mysql import ConnectionPool
+# from Visitor import Visitor
+# from Mysql import ConnectionPool
 import threading
 import math
 import subprocess
@@ -68,21 +68,56 @@ class Gui:
         self.__mainWindow.setStyleSheet(styleSheet)
         # 主窗口大小
         self.__mainWindow.setGeometry(300, 300, 940, 610)
-        # 主窗口标题
-        self.__mainWindow.setWindowTitle('Title')
         # 主窗口icon
         self.__mainWindow.setWindowIcon(QIcon('../favicon.ico'))
-        # 菜单栏
-        menubar = self.__mainWindow.menuBar()
-        menubar.addMenu('menu')
-        menubar.addMenu('menu2')
-        # 状态栏
-        self.__mainWindow.statusBar().showMessage('这里是状态栏...')
         # 信号
         self.__signal = MySignal()
         self.__signal.show_single_page.connect(my_print)
         # signal.signal.connect(my_print)
-        pass
+        self.__pages = QStackedWidget()
+        widget = QWidget()
+        self.__mainWindow.setCentralWidget(widget)
+        # 布局 网格间隔为10
+        grid = QGridLayout()
+        grid.setSpacing(10)
+        widget.setLayout(grid)
+
+    # 设置标题
+    def setTitle(self, title):
+        # 主窗口标题
+        self.__mainWindow.setWindowTitle(title)
+
+    # 设置菜单栏
+    def setMenuBar(self, name, actions=[]):
+        menubar = self.__mainWindow.menuBar()
+        menu = menubar.addMenu(name)
+        for x in actions:
+            action = QAction(x['name'], self.__mainWindow)
+            if 'shortcut' in x:
+                action.setShortcut(x['shortcut'])
+            action.setStatusTip(x['message'])
+            menu.addAction(action)
+
+    # 设置状态栏
+    def setStatusBar(self, message):
+        # 状态栏
+        self.__mainWindow.statusBar().showMessage(message)
+
+    # 设置工具栏
+    def setToolBar(self, name, actions):
+        toolbar = self.__mainWindow.addToolBar(name)
+        for x in actions:
+            action = QAction(x['name'], self.__mainWindow)
+            if 'shortcut' in x:
+                action.setShortcut(x['shortcut'])
+            action.setStatusTip(x['message'])
+            toolbar.addAction(action)
+
+    # 设置页面
+    def setPage(self):
+        widget = QStackedWidget()
+        page =  QWidget()
+        widget.addWidget(page)
 
     def setUI(self):
         widget = QWidget()
@@ -282,10 +317,16 @@ config = {
     'max_connection': 10,
     'min_connection': 2,
 }
-pool = ConnectionPool(config)
-JavBus(Visitor(), pool).run()
+# pool = ConnectionPool(config)
+# JavBus(Visitor(), pool).run()
 # task = threading.Thread(target=splider)
 # task.setDaemon(True)
-# g = Gui()
+gui = Gui()
+gui.setTitle('标题')
+gui.setStatusBar('这是状态栏')
+gui.setMenuBar('菜单', [{'name': '退出', 'message': '退出'}])
+gui.setMenuBar('收支', [{'name': '列表', 'message': '显示收支列表'}])
+gui.setToolBar('工具栏', [{'name': '退出', 'message': '退出'},{'name': '列表', 'message': '显示收支列表'}])
+gui.setToolBar('工具栏', [{'name': '退出', 'message': '退出'}])
 # g.setUI()
-# g.show()
+gui.show()
