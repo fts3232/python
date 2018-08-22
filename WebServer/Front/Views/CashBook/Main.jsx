@@ -2,6 +2,9 @@ import Component from '../../Components/Component';
 import Table from '../../Components/Table';
 import Pagination from '../../Components/Pagination';
 import Breadcrumb from '../../Components/Breadcrumb';
+import Panel from '../../Components/Panel';
+import Button from '../../Components/Button';
+import {Link} from 'react-router-dom';
 
 class Main extends Component {
     constructor(props) {
@@ -22,23 +25,25 @@ class Main extends Component {
             '金额': 'amount',
             '描述': 'description'
         };
-        let totalPage = 6;
-        let currentPage = 1;
         let total = 500;
-        let pageSize = 10;
-        let offset = (currentPage - 1) * pageSize;
-        let breadcrumb = [{'name': '账簿', 'path': '/'}];
+        let breadcrumb = [{'name': '账簿', 'path': '/cashBook'}];
+        let currentPage = parseInt(this.getParams('page'));
         return (
             <div>
                 <Breadcrumb data={breadcrumb}/>
-                <Table data={data} colunm={colunm} total={total} offset={offset}/>
-                <Pagination total={totalPage} current={currentPage}/>
+                <Panel>
+                    <div className="margin-bottom-10">
+                        <Link to="/cashBook/add">
+                            <Button type="info">添加</Button>
+                        </Link>
+                    </div>
+                    <Table data={data} colunm={colunm} total={total}/>
+                    <Pagination total={total} currentPage={currentPage}/>
+                </Panel>
             </div>
         )
     }
 }
-
-Main.childContextTypes = {};
 
 Main.PropTypes = {}
 

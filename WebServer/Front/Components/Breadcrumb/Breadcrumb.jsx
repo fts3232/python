@@ -14,8 +14,8 @@ class Breadcrumb extends Component {
             <ul className={style.breadcrumb}>
                 {data.map((v, i) => {
                     return (
-                        <li className={location.pathname == v.path ? style.active : null}>
-                            {location.pathname != v.path ? (<Link to={v.path}>{v.name}</Link>) : v.name}
+                        <li className={location.pathname.toLowerCase() == v.path.toLowerCase() ? style.active : null}>
+                            {location.pathname.toLowerCase() != v.path.toLowerCase() ? (<Link to={v.path}>{v.name}</Link>) : v.name}
                         </li>
                     );
                 })}
@@ -28,10 +28,6 @@ Breadcrumb.propTypes = {//属性校验器，表示改属性必须是bool，否�
     data: React.PropTypes.array
 }
 Breadcrumb.defaultProps = {};//设置默认属性
-
-Breadcrumb.contextTypes = {
-    router: React.PropTypes.Object
-}
 
 //导出组件
 export default Breadcrumb;

@@ -7,7 +7,7 @@ class Table extends Component {
     }
 
     render() {
-        let {data, colunm, total,offset} = this.props;
+        let {data, colunm, total, offset} = this.props;
         return (
             <div className={style['data-table']}>
                 <table>
@@ -31,7 +31,7 @@ class Table extends Component {
                     </tbody>
                 </table>
                 <div className={style['data-info']}>
-                    总共{total}条记录，显示{offset} - {}条记录
+                    总共{total}条记录
                 </div>
             </div>
         )

@@ -14,8 +14,12 @@ class NavBar extends Component {
             <div className={style['nav-bar']}>
                 <ul>
                     {data.map((v, i) => {
+                        let className = null;
+                        if(location.pathname.toLowerCase() == v.path.toLowerCase() || location.pathname.toLowerCase().indexOf(v.path.toLowerCase()) != -1){
+                            className = style.active;
+                        }
                         return (
-                            <li className={location.pathname == v.path ? style.active : null}>
+                            <li className={className}>
                                 <Link to={v.path}>{v.name}</Link>
                             </li>
                         );
@@ -28,10 +32,6 @@ class NavBar extends Component {
 
 NavBar.propTypes = {//属性校验器，表示改属性必须是bool，否则报错
     data: React.PropTypes.array
-}
-
-NavBar.contextTypes = {
-    router: React.PropTypes.Object
 }
 
 NavBar.defaultProps = {};//设置默认属性

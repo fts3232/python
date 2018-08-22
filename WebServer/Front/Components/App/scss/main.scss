@@ -1,0 +1,49 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+ul {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+body {
+    background: #EEEEEB;
+    font-family: "Helvetica Neue", Helvetica, Arial, STHeiti-Light, STHeiti-Medium, "Microsoft YaHei", "Microsoft JhengHei", STHeiti, MingLiu;
+}
+
+.content-container {
+    margin-left: 240px;
+    padding: 10px;
+}
+
+@each $i in 5, 10, 15 {
+    .margin-top-#{$i} {
+        margin-top: #{$i}px;
+    }
+    .margin-left-#{$i} {
+        margin-left: #{$i}px;
+    }
+    .margin-right-#{$i} {
+        margin-right: #{$i}px;
+    }
+    .margin-bottom-#{$i} {
+        margin-bottom: #{$i}px;
+    }
+}
+
+@for $i from 1 through 12 {
+    .col-#{$i} {
+        width: 100% * $i / 12;
+        position: relative;
+        min-height: 1px;
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+}

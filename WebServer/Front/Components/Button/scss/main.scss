@@ -1,0 +1,73 @@
+.btn {
+    outline: none;
+    color: #fff;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    cursor: pointer;
+    margin-right: 10px;
+    &.btn-default {
+        color: #333;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        &:hover {
+            color: #333;
+            background-color: #e6e6e6;
+            border-color: #adadad;
+        }
+    }
+    &.btn-info {
+        background-color: #409eff;
+        border: 1px solid #409eff;
+        &:hover {
+            background: #66b1ff;
+            border-color: #66b1ff;
+        }
+    }
+    &.btn-primary {
+        background-color: #424F63;
+        border-color: #374152;
+        &:hover {
+            background-color: #374152;
+            border-color: #2e3644;
+        }
+    }
+    &.btn-success {
+        background-color: #5cb85c;
+        border-color: #4cae4c;
+        &:hover {
+            background-color: #449d44;
+            border-color: #398439;
+        }
+    }
+    &.btn-danger {
+        background-color: #d9534f;
+        border-color: #d43f3a;
+        &:hover {
+            background-color: #c9302c;
+            border-color: #ac2925;
+        }
+    }
+    &.btn-warning {
+        background-color: #f0ad4e;
+        border-color: #eea236;
+        &:hover {
+            background-color: #ec971f;
+            border-color: #d58512;
+        }
+    }
+    &:last-child {
+        margin-right: 0;
+    }
+    &.switch {
+        background-color: #dcdfe6;
+        border-color: #dcdfe6;
+        outline: none;
+        &.on {
+            background-color: #409eff;
+            border-color: #409eff;
+        }
+    }
+}

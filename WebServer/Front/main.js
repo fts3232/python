@@ -1,4 +1,4 @@
-import App from './Views/App';
+import App from './Components/App';
 window.request = superagent;
 //react-router
 
