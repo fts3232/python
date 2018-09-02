@@ -1,12 +1,32 @@
 # import os
 from . import Controller
-from Business.CashBook import CashBook as CashBookBusiness
+from Model.CashBook import CashBook as CashBookModel
 
 
 class CashBook(Controller):
 
-    def set(self):
-        pass
-
     def get(self):
-        pass
+        try:
+            page = int(self.getArgument('page', default=1))
+            size = int(self.getArgument('size', default=10))
+            cashBook = CashBookModel()
+            ret = cashBook.get(page,size)
+            total = cashBook.getCount()
+        except BaseException as err:
+            print(err)
+            result = {'status':False}
+        else:
+            result = {'status':True,'ret':ret,'total':total}
+        self.json(result)
+
+    def add(self):
+        try:
+            data = {'CREATED_AT':self.getArgument('date'),'AMOUNT':self.getArgument('amount'),'TYPE':self.getArgument('type'),'DESCRIPTION':self.getArgument('description'),'TAGS':self.getArgument('tag')}
+            cashBook = CashBookModel()
+            ret = cashBook.add(data)
+        except BaseException as err:
+            print(err)
+            result = {'status':False}
+        else:
+            result = {'status':True}
+        self.json(result)
