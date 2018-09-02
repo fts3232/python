@@ -1,2 +1,3 @@
 import Main from './Main.jsx';
-export default Main;
+import Add from './Add.jsx';
+export {Main, Add};
