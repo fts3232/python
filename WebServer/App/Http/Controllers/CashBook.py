@@ -21,7 +21,7 @@ class CashBook(Controller):
 
     def add(self):
         try:
-            data = {'CREATED_AT':self.getArgument('date'),'AMOUNT':self.getArgument('amount'),'TYPE':self.getArgument('type'),'DESCRIPTION':self.getArgument('description'),'TAGS':self.getArgument('tag')}
+            data = {'DATE':self.getArgument('date'),'AMOUNT':self.getArgument('amount'),'TYPE':self.getArgument('type'),'DESCRIPTION':self.getArgument('description'),'TAGS':self.getArgument('tag')}
             cashBook = CashBookModel()
             ret = cashBook.add(data)
         except BaseException as err:

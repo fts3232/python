@@ -37,6 +37,7 @@ class CashBook(Model):
                	TYPE,\
                	TAGS,\
                	DESCRIPTION,\
+		DATE,\
                	CREATED_AT\
                )\
                VALUES\
@@ -45,7 +46,8 @@ class CashBook(Model):
                		:TYPE,\
                		:TAGS,\
                		:DESCRIPTION,\
-               		:CREATED_AT\
+               		:DATE,\
+			        NOW()\
                	)"
         ret = self._db.insert(sql,params)
         if(ret):
